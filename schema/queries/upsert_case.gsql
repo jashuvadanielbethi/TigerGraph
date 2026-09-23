@@ -1,0 +1,20 @@
+USE GRAPH FraudInvestigation
+
+// Idempotent case write-back: the agent calls this once per investigated
+// case_pack row so the graph is the live case record and doubles as case
+// memory for future investigations ("the case should also be written to
+// the graph ... the next investigation should be able to find it").
+CREATE OR REPLACE QUERY upsert_case(
+  STRING case_id, STRING source_case_id, STRING status, STRING verdict, DOUBLE fraud_probability,
+  STRING pattern, STRING pattern_description, DOUBLE exposure_usd, STRING summary,
+  DATETIME written_at, VERTEX<Card> card
+) FOR GRAPH FraudInvestigation
+SYNTAX V2 {
+
+  INSERT INTO Case VALUES (
+    case_id, source_case_id, status, verdict, fraud_probability, pattern,
+    pattern_description, exposure_usd, summary, written_at
+  );
+
+  INSERT INTO CASE_ABOUT_CARD VALUES (case_id, card);
+}

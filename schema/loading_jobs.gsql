@@ -1,0 +1,65 @@
+// ============================================================================
+// Loading job for FraudInvestigation graph.
+// Expects the flat CSVs produced by data_ingest/stage_for_gsql.py (which
+// reshapes data/processed/*.pkl -- run data_ingest/build_index.py first).
+// ============================================================================
+
+USE GRAPH FraudInvestigation
+
+CREATE LOADING JOB load_fraud_data FOR GRAPH FraudInvestigation {
+
+  DEFINE FILENAME f_customers   = "data/staged/customers.csv";
+  DEFINE FILENAME f_cards       = "data/staged/cards.csv";
+  DEFINE FILENAME f_txns        = "data/staged/transactions.csv";
+  DEFINE FILENAME f_devices     = "data/staged/device_profiles.csv";
+  DEFINE FILENAME f_emails      = "data/staged/email_domains.csv";
+  DEFINE FILENAME f_regions     = "data/staged/billing_regions.csv";
+  DEFINE FILENAME f_closed      = "data/staged/closed_cases.csv";
+
+  DEFINE FILENAME f_owns          = "data/staged/edges_owns.csv";
+  DEFINE FILENAME f_made          = "data/staged/edges_made.csv";
+  DEFINE FILENAME f_from_device   = "data/staged/edges_from_device.csv";
+  DEFINE FILENAME f_purchaser_em  = "data/staged/edges_purchaser_email.csv";
+  DEFINE FILENAME f_billed_in     = "data/staged/edges_billed_in.csv";
+  DEFINE FILENAME f_involves      = "data/staged/edges_closed_involves.csv";
+  DEFINE FILENAME f_on_card       = "data/staged/edges_closed_on_card.csv";
+  DEFINE FILENAME f_connected     = "data/staged/edges_closed_connected.csv";
+
+  LOAD f_customers TO VERTEX Customer VALUES ($"customer_id") USING header="true", separator=",";
+
+  LOAD f_cards TO VERTEX Card VALUES (
+    $"card_id", $"customer_id", $"card1", $"card2", $"card3", $"card4", $"card5", $"card6"
+  ) USING header="true", separator=",";
+
+  LOAD f_txns TO VERTEX Transaction VALUES (
+    $"transaction_id", $"transaction_dt", $"ts", $"transaction_amt", $"product_cd", $"channel",
+    $"addr1", $"addr2", $"dist1", $"dist2", $"p_emaildomain", $"r_emaildomain", $"risk_score"
+  ) USING header="true", separator=",";
+
+  LOAD f_devices TO VERTEX DeviceProfile VALUES (
+    $"device_profile_id", $"device_info", $"os", $"browser", $"screen"
+  ) USING header="true", separator=",";
+
+  LOAD f_emails TO VERTEX EmailDomain VALUES ($"domain") USING header="true", separator=",";
+  LOAD f_regions TO VERTEX BillingRegion VALUES ($"addr1") USING header="true", separator=",";
+
+  LOAD f_closed TO VERTEX ClosedCase VALUES (
+    $"case_id", $"customer_id", $"card_id", $"opened_at", $"closed_at", $"outcome", $"pattern",
+    $"first_fraud_txn_id", $"n_txns", $"exposure_usd", $"actions_taken", $"report_filed", $"analyst_notes"
+  ) USING header="true", separator=",";
+
+  LOAD f_owns TO EDGE OWNS VALUES ($"customer_id", $"card_id") USING header="true", separator=",";
+  LOAD f_made TO EDGE MADE VALUES ($"card_id", $"transaction_id") USING header="true", separator=",";
+  LOAD f_from_device TO EDGE FROM_DEVICE VALUES ($"transaction_id", $"device_profile_id")
+    USING header="true", separator=",";
+  LOAD f_purchaser_em TO EDGE PURCHASER_EMAIL VALUES ($"transaction_id", $"domain")
+    USING header="true", separator=",";
+  LOAD f_billed_in TO EDGE BILLED_IN VALUES ($"transaction_id", $"addr1")
+    USING header="true", separator=",";
+  LOAD f_involves TO EDGE INVOLVES VALUES ($"case_id", $"transaction_id")
+    USING header="true", separator=",";
+  LOAD f_on_card TO EDGE ON_CARD VALUES ($"case_id", $"card_id")
+    USING header="true", separator=",";
+  LOAD f_connected TO EDGE CONNECTED_TO VALUES ($"case_id", $"card_id")
+    USING header="true", separator=",";
+}

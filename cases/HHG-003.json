@@ -1,0 +1,128 @@
+{
+  "case_id": "HHG-003",
+  "case": {
+    "status": "closed_fraud",
+    "verdict": "fraud",
+    "fraud_probability": 0.72,
+    "pattern": "none",
+    "pattern_description": "",
+    "affected_txn_ids": [
+      "3530164"
+    ],
+    "first_suspicious_txn_id": "3530164",
+    "connected_card_ids": [],
+    "connected_device_profiles": [],
+    "exposure_usd": 49.0,
+    "evidence": [
+      {
+        "claim": "Card C08623-K2 has 1134 known transactions on file ({'in_person': 1080, 'online': 54}).",
+        "source": "graph",
+        "ref": "query:card_window(card_id=C08623-K2)",
+        "entity_ids": [
+          "3013960",
+          "3014333",
+          "3014962",
+          "3015183",
+          "3015779",
+          "3017365",
+          "3017773",
+          "3017927",
+          "3018166",
+          "3018431",
+          "3019196",
+          "3020683",
+          "3020799",
+          "3020831",
+          "3020834",
+          "3020881",
+          "3020895",
+          "3021411",
+          "3022086",
+          "3022812"
+        ]
+      },
+      {
+        "claim": "Customer report: Customer C08623 message: 'I never made this $49.00 purchase. Please check my card.' Refers to 3530164.",
+        "source": "customer",
+        "ref": "case_pack.trigger_text",
+        "entity_ids": [
+          "3530164"
+        ]
+      },
+      {
+        "claim": "Similar closed case CC-1589 on this same customer was cleared as legitimate: Case CC-1589: model scored a $99.91 transaction at 0.94. Cardholder confirmed travel to the billing region in question. Alert cleared.",
+        "source": "graph",
+        "ref": "query:similar_prior_cases",
+        "entity_ids": []
+      },
+      {
+        "claim": "Similar closed case CC-3682 (out_of_region_use) on this customer/card/device/region was confirmed fraud: Case CC-3682: cardholder C08623 reported unrecognized activity on card C08623-K2. 2 transaction(s) between 2016-09-17 and 2016-09-19 totaling $300.51 were confirmed fraudulent. Card-present use in a b",
+        "source": "graph",
+        "ref": "query:similar_prior_cases",
+        "entity_ids": []
+      },
+      {
+        "claim": "Similar closed case CC-2935 (out_of_region_use) on this customer/card/device/region was confirmed fraud: Case CC-2935: cardholder C08623 reported unrecognized activity on card C08623-K2. 2 transaction(s) between 2016-09-02 and 2016-09-02 totaling $238.00 were confirmed fraudulent. Card-present use in a b",
+        "source": "graph",
+        "ref": "query:similar_prior_cases",
+        "entity_ids": []
+      },
+      {
+        "claim": "Relevant policy: ## 3. Card-not-present fraud from a new device",
+        "source": "document",
+        "ref": "fraud_patterns#6",
+        "entity_ids": []
+      }
+    ],
+    "similar_prior_cases": [
+      "CC-1589",
+      "CC-3682",
+      "CC-2935",
+      "CC-4957",
+      "CC-3327"
+    ],
+    "summary": "Case HHG-003 (customer_report) on card C08623-K2 (customer C08623): verdict fraud, fraud probability 0.72. Pattern: none. Exposure: $49.00. Key evidence: Card C08623-K2 has 1134 known transactions on file ({'in_person': 1080, 'online': 54}). Similar closed case CC-1589 on this same customer was cleared as legitimate: Case CC-1589: model scored a $99.91 transaction at 0.94. Cardholder confirmed travel to the billing region in question. Alert cleared.",
+    "written_to_graph": true,
+    "graph_case_id": "CASE-HHG-003"
+  },
+  "evidence_requests": [],
+  "next_best_actions": {
+    "initial": [
+      {
+        "action": "BLOCK_CARD",
+        "route": "L1",
+        "reason": "R2: customer denies the transaction"
+      },
+      {
+        "action": "CREATE_CASE",
+        "route": "auto",
+        "reason": "R2: customer denial opens a case"
+      }
+    ],
+    "final": [
+      {
+        "action": "BLOCK_CARD",
+        "route": "L1",
+        "reason": "R2: customer denies the transaction"
+      },
+      {
+        "action": "CREATE_CASE",
+        "route": "auto",
+        "reason": "R2: customer denial opens a case"
+      }
+    ],
+    "what_changed": "nothing"
+  },
+  "sar": {
+    "file": false,
+    "reason": "Policy 3a: fraud probability 0.72 but exposure $49.00 is at or below $1,000 and the activity does not connect to a shared device/region cluster or another customer's fraud -- no SAR trigger met.",
+    "narrative": "",
+    "subjects": [],
+    "total_amount_usd": 0,
+    "activity_dates": []
+  },
+  "stop_reason": "Probability remains in the uncertain band after graph evidence and available verification; escalating to a human analyst per R8 rather than continuing indefinitely (Policy Section 6).",
+  "tool_calls": 5,
+  "tokens": 0,
+  "latency_s": 0.048
+}

@@ -1,0 +1,162 @@
+{
+  "case_id": "HHG-008",
+  "case": {
+    "status": "closed_fraud",
+    "verdict": "fraud",
+    "fraud_probability": 0.9,
+    "pattern": "card_not_present_fraud",
+    "pattern_description": "",
+    "affected_txn_ids": [
+      "3553223",
+      "3553269",
+      "3553275",
+      "3553281",
+      "3554288",
+      "3554589",
+      "3554683",
+      "3555638",
+      "3555768",
+      "3556719",
+      "3557118",
+      "3557979",
+      "3557987",
+      "3558054",
+      "3558907",
+      "3561532",
+      "3561904"
+    ],
+    "first_suspicious_txn_id": "3553223",
+    "connected_card_ids": [],
+    "connected_device_profiles": [],
+    "exposure_usd": 816.09,
+    "evidence": [
+      {
+        "claim": "Card C13171-K2 has 927 known transactions on file ({'online': 926, 'in_person': 1}).",
+        "source": "graph",
+        "ref": "query:card_window(card_id=C13171-K2)",
+        "entity_ids": [
+          "3000061",
+          "3001790",
+          "3003521",
+          "3003881",
+          "3004655",
+          "3004954",
+          "3005005",
+          "3005024",
+          "3005101",
+          "3005123",
+          "3005145",
+          "3005721",
+          "3006222",
+          "3006257",
+          "3006277",
+          "3007447",
+          "3007484",
+          "3007541",
+          "3007627",
+          "3007690"
+        ]
+      },
+      {
+        "claim": "Customer report: Customer C13171 message: 'I never made this $55.68 purchase. Please check my card.' Refers to 3558054.",
+        "source": "customer",
+        "ref": "case_pack.trigger_text",
+        "entity_ids": [
+          "3558054"
+        ]
+      },
+      {
+        "claim": "17 online transactions on this card within a 48-hour window around the flagged transaction.",
+        "source": "graph",
+        "ref": "query:card_window(48h burst)",
+        "entity_ids": [
+          "3553223",
+          "3553269",
+          "3553275",
+          "3553281",
+          "3554288",
+          "3554589",
+          "3554683",
+          "3555638",
+          "3555768",
+          "3556719",
+          "3557118",
+          "3557979",
+          "3557987",
+          "3558054",
+          "3558907",
+          "3561532",
+          "3561904"
+        ]
+      },
+      {
+        "claim": "Similar closed case CC-0056 (card_not_present_new_device) on this customer/card/device/region was confirmed fraud: Case CC-0056: cardholder C13171 reported unrecognized activity on card C13171-K2. 1 transaction(s) between 2016-07-03 and 2016-07-03 totaling $40.21 were confirmed fraudulent. Online purchases from a ",
+        "source": "graph",
+        "ref": "query:similar_prior_cases",
+        "entity_ids": []
+      },
+      {
+        "claim": "Similar closed case CC-0467 (card_not_present_new_device) on this customer/card/device/region was confirmed fraud: Case CC-0467: cardholder C13171 reported unrecognized activity on card C13171-K2. 8 transaction(s) between 2016-07-06 and 2016-07-12 totaling $649.77 were confirmed fraudulent. Online purchases from a",
+        "source": "graph",
+        "ref": "query:similar_prior_cases",
+        "entity_ids": []
+      },
+      {
+        "claim": "Relevant policy: ## 3. Card-not-present fraud from a new device",
+        "source": "document",
+        "ref": "fraud_patterns#6",
+        "entity_ids": []
+      }
+    ],
+    "similar_prior_cases": [
+      "CC-0056",
+      "CC-0467",
+      "CC-0772",
+      "CC-1293",
+      "CC-1715"
+    ],
+    "summary": "Case HHG-008 (customer_report) on card C13171-K2 (customer C13171): verdict fraud, fraud probability 0.90. Pattern: card_not_present_fraud. Exposure: $816.09. Key evidence: Card C13171-K2 has 927 known transactions on file ({'online': 926, 'in_person': 1}). 17 online transactions on this card within a 48-hour window around the flagged transaction.",
+    "written_to_graph": true,
+    "graph_case_id": "CASE-HHG-008"
+  },
+  "evidence_requests": [],
+  "next_best_actions": {
+    "initial": [
+      {
+        "action": "BLOCK_CARD",
+        "route": "L1",
+        "reason": "R2: customer denies the transaction"
+      },
+      {
+        "action": "CREATE_CASE",
+        "route": "auto",
+        "reason": "R2: customer denial opens a case"
+      }
+    ],
+    "final": [
+      {
+        "action": "BLOCK_CARD",
+        "route": "L1",
+        "reason": "R2: customer denies the transaction"
+      },
+      {
+        "action": "CREATE_CASE",
+        "route": "auto",
+        "reason": "R2: customer denial opens a case"
+      }
+    ],
+    "what_changed": "nothing"
+  },
+  "sar": {
+    "file": false,
+    "reason": "Policy 3a: fraud probability 0.90 but exposure $816.09 is at or below $1,000 and the activity does not connect to a shared device/region cluster or another customer's fraud -- no SAR trigger met.",
+    "narrative": "",
+    "subjects": [],
+    "total_amount_usd": 0,
+    "activity_dates": []
+  },
+  "stop_reason": "Fraud probability 0.90 is at or above 0.85, supported by 3 independent evidence type(s) (['burst', 'customer_report', 'similar_confirmed_case']); further investigation is unlikely to change the recommended action.",
+  "tool_calls": 6,
+  "tokens": 0,
+  "latency_s": 0.068
+}

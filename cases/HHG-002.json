@@ -1,0 +1,122 @@
+{
+  "case_id": "HHG-002",
+  "case": {
+    "status": "closed_legitimate",
+    "verdict": "legitimate",
+    "fraud_probability": 0.02,
+    "pattern": "none",
+    "pattern_description": "",
+    "affected_txn_ids": [],
+    "first_suspicious_txn_id": "",
+    "connected_card_ids": [],
+    "connected_device_profiles": [],
+    "exposure_usd": 0.0,
+    "evidence": [
+      {
+        "claim": "Card C11891-K1 has 44 known transactions on file ({'online': 44}).",
+        "source": "graph",
+        "ref": "query:card_window(card_id=C11891-K1)",
+        "entity_ids": [
+          "3004451",
+          "3041882",
+          "3043555",
+          "3073868",
+          "3176883",
+          "3185167",
+          "3189049",
+          "3215277",
+          "3227718",
+          "3230270",
+          "3230363",
+          "3230393",
+          "3230409",
+          "3230493",
+          "3264883",
+          "3272926",
+          "3273763",
+          "3295566",
+          "3302993",
+          "3307219"
+        ]
+      },
+      {
+        "claim": "Bank detection model scored this transaction at 0.79. Treated as a weak prior only, per policy Section 0: a risk score is an input, never a verdict.",
+        "source": "graph",
+        "ref": "case_pack.risk_score",
+        "entity_ids": [
+          "3478782"
+        ]
+      },
+      {
+        "claim": "Online transaction inconsistent with this card's history: amount $292.36 is 9.7 standard deviations above this card's historical average ($44.66)",
+        "source": "graph",
+        "ref": "query:card_window(product/amount history)",
+        "entity_ids": [
+          "3478782"
+        ]
+      },
+      {
+        "claim": "Similar closed case CC-4160 (card_not_present_fraud) on this customer/card/device/region was confirmed fraud: Case CC-4160: cardholder C11891 reported unrecognized activity on card C11891-K1. 1 transaction(s) between 2016-09-29 and 2016-09-29 totaling $90.54 were confirmed fraudulent. Online purchases inconsi",
+        "source": "graph",
+        "ref": "query:similar_prior_cases",
+        "entity_ids": []
+      },
+      {
+        "claim": "Relevant policy: ## 3. Card-not-present fraud from a new device",
+        "source": "document",
+        "ref": "fraud_patterns#6",
+        "entity_ids": []
+      },
+      {
+        "claim": "Evidence request (customer_validation): Customer confirms they made this $292.36 transaction.",
+        "source": "customer",
+        "ref": "evidence_request:1",
+        "entity_ids": [
+          "3478782"
+        ]
+      }
+    ],
+    "similar_prior_cases": [
+      "CC-4160"
+    ],
+    "summary": "Case HHG-002 (risk_score) on card C11891-K1 (customer C11891): verdict legitimate, fraud probability 0.02. Key evidence: Card C11891-K1 has 44 known transactions on file ({'online': 44}). Bank detection model scored this transaction at 0.79. Treated as a weak prior only, per policy Section 0: a risk score is an input, never a verdict.",
+    "written_to_graph": true,
+    "graph_case_id": "CASE-HHG-002"
+  },
+  "evidence_requests": [
+    {
+      "type": "customer_validation",
+      "asked_after_step": 1,
+      "assumed_response": "Customer confirms they made this $292.36 transaction."
+    }
+  ],
+  "next_best_actions": {
+    "initial": [
+      {
+        "action": "VERIFY_WITH_CUSTOMER",
+        "route": "auto",
+        "reason": "R1: probability 0.36 rests on a single signal, verify before any block"
+      }
+    ],
+    "final": [
+      {
+        "action": "CLOSE_NO_FRAUD",
+        "route": "auto",
+        "reason": "R3: customer confirmed the transaction"
+      }
+    ],
+    "what_changed": "Simulated customer confirmation (assumed because pre-request probability was 0.36, below the midpoint) settled the case as legitimate per R3."
+  },
+  "sar": {
+    "file": false,
+    "reason": "Policy 3a: fraud not confirmed or strongly suspected (probability below 0.70); no SAR trigger met.",
+    "narrative": "",
+    "subjects": [],
+    "total_amount_usd": 0,
+    "activity_dates": []
+  },
+  "stop_reason": "Fraud probability 0.02 is at or below 0.15, supported by 3 independent evidence type(s); further investigation is unlikely to change the recommendation.",
+  "tool_calls": 5,
+  "tokens": 0,
+  "latency_s": 0.045
+}

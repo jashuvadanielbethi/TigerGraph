@@ -1,0 +1,45 @@
+USE GRAPH FraudInvestigation
+
+// Case memory: closed cases (July-Oct) sharing this customer, card, device
+// profile, or billing region, ranked by overlap strength. Mirrors
+// agent/data_index.py:DataIndex.similar_prior_cases.
+CREATE OR REPLACE QUERY similar_prior_cases(VERTEX<Customer> customer, VERTEX<Card> card,
+                                             VERTEX<DeviceProfile> device, VERTEX<BillingRegion> region,
+                                             INT top_k=5) FOR GRAPH FraudInvestigation
+SYNTAX V2 {
+
+  SumAccum<INT> @overlapScore;
+  SetAccum<VERTEX<ClosedCase>> @@candidates;
+
+  Start = {card};
+
+  // same card directly named in a past closed case
+  DirectCard = SELECT cc
+               FROM Start:c -(<ON_CARD)- ClosedCase:cc
+               ACCUM cc.@overlapScore += 3
+               POST-ACCUM @@candidates += cc;
+
+  // same device profile
+  IF device.type != "" THEN
+    DeviceCases = SELECT cc
+                  FROM (device) -(<FROM_DEVICE)- Transaction:t -(<INVOLVES)- ClosedCase:cc
+                  ACCUM cc.@overlapScore += 3
+                  POST-ACCUM @@candidates += cc;
+  END;
+
+  // same billing region
+  IF region.type != "" THEN
+    RegionCases = SELECT cc
+                  FROM (region) -(<BILLED_IN)- Transaction:t -(<INVOLVES)- ClosedCase:cc
+                  ACCUM cc.@overlapScore += 1
+                  POST-ACCUM @@candidates += cc;
+  END;
+
+  Result = SELECT cc
+           FROM {@@candidates}
+           ORDER BY cc.@overlapScore DESC
+           LIMIT top_k;
+
+  PRINT Result[Result.case_id, Result.pattern, Result.outcome, Result.exposure_usd,
+               Result.analyst_notes, Result.@overlapScore AS overlap_score];
+}

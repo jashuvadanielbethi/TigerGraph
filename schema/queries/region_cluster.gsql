@@ -1,0 +1,32 @@
+USE GRAPH FraudInvestigation
+
+// Every OTHER card billed in this region within a window. Mirrors
+// agent/data_index.py:DataIndex.region_cluster. NOTE: the Python agent
+// deliberately does NOT score this as a probability signal on its own --
+// a populous billing region produces dozens of unrelated legitimate
+// co-occurrences. It's kept here as a query available for a real
+// per-card "is this ALSO new for them" cross-check, which is the actual
+// fix (see docs/architecture.md).
+CREATE OR REPLACE QUERY region_cluster(VERTEX<BillingRegion> region, VERTEX<Card> exclude_card,
+                                        DATETIME center_ts, INT window_days=14) FOR GRAPH FraudInvestigation
+SYNTAX V2 {
+
+  SetAccum<VERTEX<Card>> @@connectedCards;
+  SetAccum<VERTEX<Transaction>> @@clusterTxns;
+
+  Start = {region};
+
+  Cluster = SELECT t
+            FROM Start:r -(<BILLED_IN)- Transaction:t
+            WHERE datetime_diff(t.ts, center_ts) >= -window_days*86400
+              AND datetime_diff(t.ts, center_ts) <= window_days*86400
+            ACCUM @@clusterTxns += t;
+
+  Cards = SELECT c
+          FROM Cluster:t -(<MADE)- Card:c
+          WHERE c != exclude_card
+          ACCUM @@connectedCards += c;
+
+  PRINT @@connectedCards AS connected_cards;
+  PRINT @@clusterTxns AS cluster_transactions;
+}

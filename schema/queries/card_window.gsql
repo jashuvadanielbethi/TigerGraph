@@ -1,0 +1,22 @@
+USE GRAPH FraudInvestigation
+
+// Full (or time-windowed) transaction history for one card. Mirrors
+// agent/data_index.py:DataIndex.card_window -- the primary "gather
+// evidence" call for card-testing, CNP-anomaly, and out-of-region checks.
+CREATE OR REPLACE QUERY card_window(VERTEX<Card> card, DATETIME center_ts, INT hours=0) FOR GRAPH FraudInvestigation
+SYNTAX V2 {
+
+  SetAccum<VERTEX<Transaction>> @@txns;
+
+  Start = {card};
+
+  Txns = SELECT t
+         FROM Start:c -(MADE>)- Transaction:t
+         WHERE hours == 0 OR (datetime_diff(t.ts, center_ts) >= -hours*3600
+                               AND datetime_diff(t.ts, center_ts) <= hours*3600)
+         ACCUM @@txns += t
+         ORDER BY t.ts ASC;
+
+  PRINT card AS card;
+  PRINT @@txns AS transactions;
+}

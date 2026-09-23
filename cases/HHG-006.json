@@ -1,0 +1,178 @@
+{
+  "case_id": "HHG-006",
+  "case": {
+    "status": "closed_fraud",
+    "verdict": "fraud",
+    "fraud_probability": 0.97,
+    "pattern": "card_not_present_fraud",
+    "pattern_description": "",
+    "affected_txn_ids": [
+      "3476602",
+      "3476633",
+      "3476665",
+      "3476682"
+    ],
+    "first_suspicious_txn_id": "3476602",
+    "connected_card_ids": [],
+    "connected_device_profiles": [],
+    "exposure_usd": 1906.07,
+    "evidence": [
+      {
+        "claim": "Card C07297-K1 has 163 known transactions on file ({'in_person': 157, 'online': 6}).",
+        "source": "graph",
+        "ref": "query:card_window(card_id=C07297-K1)",
+        "entity_ids": [
+          "3012743",
+          "3015809",
+          "3021030",
+          "3021302",
+          "3036242",
+          "3107995",
+          "3281598",
+          "3285154",
+          "3286312",
+          "3294774",
+          "3300608",
+          "3301349",
+          "3302665",
+          "3306875",
+          "3306994",
+          "3313868",
+          "3314029",
+          "3315965",
+          "3318573",
+          "3321259"
+        ]
+      },
+      {
+        "claim": "Customer report: Customer C07297 message: 'I never made this $482.12 purchase. Please check my card.' Refers to 3476682.",
+        "source": "customer",
+        "ref": "case_pack.trigger_text",
+        "entity_ids": [
+          "3476682"
+        ]
+      },
+      {
+        "claim": "4 online transactions on this card within a 48-hour window around the flagged transaction.",
+        "source": "graph",
+        "ref": "query:card_window(48h burst)",
+        "entity_ids": [
+          "3476602",
+          "3476633",
+          "3476665",
+          "3476682"
+        ]
+      },
+      {
+        "claim": "Identity record marks the device as New for this account",
+        "source": "graph",
+        "ref": "query:identity(id_15,id_23)",
+        "entity_ids": [
+          "3476682"
+        ]
+      },
+      {
+        "claim": "Similar closed case CC-0022 (card_not_present_fraud) on this customer/card/device/region was confirmed fraud: Case CC-0022: cardholder C07847 reported unrecognized activity on card C07847-K2. 1 transaction(s) between 2016-07-02 and 2016-07-02 totaling $100.04 were confirmed fraudulent. Online purchases incons",
+        "source": "graph",
+        "ref": "query:similar_prior_cases",
+        "entity_ids": []
+      },
+      {
+        "claim": "Similar closed case CC-0087 (out_of_region_use) on this customer/card/device/region was confirmed fraud: Case CC-0087: cardholder C11031 reported unrecognized activity on card C11031-K2. 1 transaction(s) between 2016-07-04 and 2016-07-04 totaling $399.92 were confirmed fraudulent. Card-present use in a b",
+        "source": "graph",
+        "ref": "query:similar_prior_cases",
+        "entity_ids": []
+      },
+      {
+        "claim": "Similar closed case CC-0103 (account_takeover) on this customer/card/device/region was confirmed fraud: Case CC-0103: cardholder C08860 reported unrecognized activity on card C08860-K1. 1 transaction(s) between 2016-07-05 and 2016-07-05 totaling $49.97 were confirmed fraudulent. Mixed-channel activity i",
+        "source": "graph",
+        "ref": "query:similar_prior_cases",
+        "entity_ids": []
+      },
+      {
+        "claim": "Similar closed case CC-0118 (account_takeover) on this customer/card/device/region was confirmed fraud: Case CC-0118: cardholder C04108 reported unrecognized activity on card C04108-K2. 10 transaction(s) between 2016-07-03 and 2016-07-05 totaling $3,205.87 were confirmed fraudulent. Mixed-channel activi",
+        "source": "graph",
+        "ref": "query:similar_prior_cases",
+        "entity_ids": []
+      },
+      {
+        "claim": "Similar closed case CC-0119 (card_not_present_fraud) on this customer/card/device/region was confirmed fraud: Case CC-0119: cardholder C01981 reported unrecognized activity on card C01981-K1. 1 transaction(s) between 2016-07-04 and 2016-07-04 totaling $100.06 were confirmed fraudulent. Online purchases incons",
+        "source": "graph",
+        "ref": "query:similar_prior_cases",
+        "entity_ids": []
+      },
+      {
+        "claim": "Relevant policy: ## 3. Card-not-present fraud from a new device",
+        "source": "document",
+        "ref": "fraud_patterns#6",
+        "entity_ids": []
+      }
+    ],
+    "similar_prior_cases": [
+      "CC-0022",
+      "CC-0087",
+      "CC-0103",
+      "CC-0118",
+      "CC-0119"
+    ],
+    "summary": "Case HHG-006 (customer_report) on card C07297-K1 (customer C07297): verdict fraud, fraud probability 0.97. Pattern: card_not_present_fraud. Exposure: $1906.07. Key evidence: Card C07297-K1 has 163 known transactions on file ({'in_person': 157, 'online': 6}). 4 online transactions on this card within a 48-hour window around the flagged transaction.",
+    "written_to_graph": true,
+    "graph_case_id": "CASE-HHG-006"
+  },
+  "evidence_requests": [],
+  "next_best_actions": {
+    "initial": [
+      {
+        "action": "BLOCK_CARD",
+        "route": "L1",
+        "reason": "R2: customer denies the transaction"
+      },
+      {
+        "action": "CREATE_CASE",
+        "route": "auto",
+        "reason": "R2: customer denial opens a case"
+      },
+      {
+        "action": "FILE_REPORT",
+        "route": "L2",
+        "reason": "R2: exposure exceeds $1,000 or connects to a shared device/region"
+      }
+    ],
+    "final": [
+      {
+        "action": "BLOCK_CARD",
+        "route": "L1",
+        "reason": "R2: customer denies the transaction"
+      },
+      {
+        "action": "CREATE_CASE",
+        "route": "auto",
+        "reason": "R2: customer denial opens a case"
+      },
+      {
+        "action": "FILE_REPORT",
+        "route": "L2",
+        "reason": "R2: exposure exceeds $1,000 or connects to a shared device/region"
+      }
+    ],
+    "what_changed": "nothing"
+  },
+  "sar": {
+    "file": true,
+    "reason": "Policy 3a: fraud confirmed/strongly suspected and exposure exceeds $1,000",
+    "narrative": "Between 2016-11-21 and 2016-11-21, card C07297-K1 belonging to customer C07297 was used for 4 transaction(s) totaling $1906.07, identified as card not present fraud activity. Transactions: $478.95 on 2016-11-21 20:00 (online); $456.96 on 2016-11-21 20:10 (online); $488.04 on 2016-11-21 20:24 (online); $482.12 on 2016-11-21 20:30 (online). The activity was flagged by a customer report trigger and corroborated by graph analysis of this card's transaction history. This filing is required under Policy Section 3a because exposure exceeds $1,000. Card C07297-K1 has been recommended for blocking and reissue; any connected cards have been placed under monitoring pending further review.",
+    "subjects": [
+      "C07297",
+      "C07297-K1"
+    ],
+    "total_amount_usd": 1906.07,
+    "activity_dates": [
+      "2016-11-21",
+      "2016-11-21"
+    ]
+  },
+  "stop_reason": "Fraud probability 0.97 is at or above 0.85, supported by 4 independent evidence type(s) (['burst', 'customer_report', 'new_device', 'similar_confirmed_case']); further investigation is unlikely to change the recommended action.",
+  "tool_calls": 6,
+  "tokens": 0,
+  "latency_s": 0.056
+}

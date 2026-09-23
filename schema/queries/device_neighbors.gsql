@@ -1,0 +1,32 @@
+USE GRAPH FraudInvestigation
+
+// Every OTHER card that transacted from the same device profile, optionally
+// windowed around a reference time. Mirrors
+// agent/data_index.py:DataIndex.device_neighbors -- the Policy R6
+// "shared origin" ring-detection query. Only DeviceProfile vertices with a
+// specific (non-generic) DeviceInfo exist in the graph at all -- see
+// data_ingest/build_index.py:is_specific_device_info for why "Windows" /
+// "iOS Device" alone are excluded as fingerprints.
+CREATE OR REPLACE QUERY device_neighbors(VERTEX<DeviceProfile> device, VERTEX<Card> exclude_card,
+                                          DATETIME center_ts, INT window_days=30) FOR GRAPH FraudInvestigation
+SYNTAX V2 {
+
+  SetAccum<VERTEX<Card>> @@connectedCards;
+  SetAccum<VERTEX<Transaction>> @@neighborTxns;
+
+  Start = {device};
+
+  Neighbors = SELECT t
+              FROM Start:d -(<FROM_DEVICE)- Transaction:t
+              WHERE datetime_diff(t.ts, center_ts) >= -window_days*86400
+                AND datetime_diff(t.ts, center_ts) <= window_days*86400
+              ACCUM @@neighborTxns += t;
+
+  Cards = SELECT c
+          FROM Neighbors:t -(<MADE)- Card:c
+          WHERE c != exclude_card
+          ACCUM @@connectedCards += c;
+
+  PRINT @@connectedCards AS connected_cards;
+  PRINT @@neighborTxns AS neighbor_transactions;
+}

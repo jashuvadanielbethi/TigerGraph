@@ -428,8 +428,8 @@ def render_case(case_id: str, answer: dict) -> None:
     if c["connected_device_profiles"]:
         st.caption(f"Shared device profile(s): {', '.join(c['connected_device_profiles'])}")
 
-    tab_evidence, tab_actions, tab_sar, tab_raw = st.tabs(
-        ["Evidence & case memory", "Next-best-action", "SAR", "Raw JSON"])
+    tab_evidence, tab_actions, tab_sar = st.tabs(
+        ["Evidence & case memory", "Next-best-action", "SAR"])
 
     with tab_evidence:
         st.markdown(f"**{icon('database', 14)} Evidence**", unsafe_allow_html=True)
@@ -477,8 +477,6 @@ def render_case(case_id: str, answer: dict) -> None:
               <p style="margin:6px 0 0; font-size:.85rem; color:var(--ink-soft); line-height:1.55;">{sar['narrative']}</p>
             </div>""", unsafe_allow_html=True)
 
-    with tab_raw:
-        st.json(answer)
 
 
 def render_overview(cases: dict[str, dict]) -> None:

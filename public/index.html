@@ -112,7 +112,7 @@ function caseHTML(a,id){
   <div class="card"><h3>Evidence</h3><table><tr><th>Source</th><th>Claim</th><th>Ref</th></tr>${ev}</table>
     <p style="margin-top:14px"><b>Similar prior cases:</b> ${c.similar_prior_cases.map(x=>`<span class="chip">${esc(x)}</span>`).join("")||"none"}</p>
     <p><b>Evidence requests:</b> ${req}</p><small style="color:var(--soft)">tool_calls=${a.tool_calls} &middot; tokens=${a.tokens} &middot; latency=${a.latency_s}s</small></div>
-  ${sar}<details class="card"><summary><b>Raw JSON</b></summary><pre>${esc(JSON.stringify(a,null,2))}</pre></details>`;
+  ${sar}`;
 }
 function detail(){
   const opts=IDS.map(i=>`<option value="${i}" ${i===current?"selected":""}>${i} — ${V[cases[i].case.verdict][0]}</option>`).join("");

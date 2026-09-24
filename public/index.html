@@ -70,7 +70,7 @@ pre{background:#101113;color:#e6e6e6;padding:16px;border-radius:14px;overflow:au
 <div class="wrap">
   <div class="hero"><i><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-4.35-4.35"/></svg></i>
     <div><h1>TigerGraph Agentic Fraud Investigation</h1></div></div>
-  <div class="tabs"><button id="t-over" class="on">Overview</button><button id="t-det">Case detail</button><button id="t-new">New investigation</button></div>
+  <div class="tabs"><button id="t-new" class="on">New investigation</button><button id="t-det">Case detail</button><button id="t-over">Overview</button></div>
   <div id="app"></div>
 </div>
 <script>
@@ -157,7 +157,8 @@ async function lookup(id,trigger,text){
 
 function show(t){["over","det","new"].forEach(k=>$("#t-"+k).classList.toggle("on",t===k));t==="over"?overview():t==="det"?detail():newInv()}
 $("#t-over").onclick=()=>show("over");$("#t-det").onclick=()=>show("det");$("#t-new").onclick=()=>show("new");
-Promise.all(IDS.map(i=>fetch(`cases/${i}.json`).then(r=>r.json()).then(j=>cases[i]=j))).then(()=>show("over")).catch(e=>{$("#app").innerHTML=`<div class="card">Could not load case files: ${esc(e)}</div>`});
+show("new");
+Promise.all(IDS.map(i=>fetch(`cases/${i}.json`).then(r=>r.json()).then(j=>cases[i]=j))).catch(e=>{$("#app").innerHTML=`<div class="card">Could not load case files: ${esc(e)}</div>`});
 </script>
 </body>
 </html>

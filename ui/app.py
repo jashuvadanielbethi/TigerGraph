@@ -593,7 +593,7 @@ def main() -> None:
         st.error("No answer files found in cases/. Run `python run_case_pack.py` first.")
         return
 
-    tab_overview, tab_detail, tab_new = st.tabs(["Overview", "Case detail", "New investigation"])
+    tab_new, tab_detail, tab_overview = st.tabs(["New investigation", "Case detail", "Overview"])
 
     with tab_overview:
         render_overview(cases)

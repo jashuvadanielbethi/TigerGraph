@@ -1,11 +1,4 @@
-pyTigerGraph>=1.6
-anthropic>=0.40
-openai>=1.40
-python-dotenv>=1.0
-pydantic>=2.7
-streamlit>=1.38
 pandas>=2.2
 numpy>=1.26
 scikit-learn>=1.5
-rich>=13.7
-pytest>=8.0
+python-dotenv>=1.0

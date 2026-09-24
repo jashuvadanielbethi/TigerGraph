@@ -584,8 +584,6 @@ def main() -> None:
       <div class="hero-icon">{icon('search', 22, '#ffffff', 2.2)}</div>
       <div>
         <p class="hero-title">TigerGraph Agentic Fraud Investigation</p>
-        <p class="hero-sub">HHGOA case pack &middot; 20 graded cases investigated against the full IEEE-CIS-derived
-        transaction graph under Fraud Policy v1.0</p>
       </div>
     </div>
     """, unsafe_allow_html=True)

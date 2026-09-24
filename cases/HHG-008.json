@@ -158,5 +158,5 @@
   "stop_reason": "Fraud probability 0.90 is at or above 0.85, supported by 3 independent evidence type(s) (['burst', 'customer_report', 'similar_confirmed_case']); further investigation is unlikely to change the recommended action.",
   "tool_calls": 6,
   "tokens": 0,
-  "latency_s": 0.068
+  "latency_s": 0.043
 }

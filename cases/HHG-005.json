@@ -128,5 +128,5 @@
   "stop_reason": "Fraud probability 0.02 is at or below 0.15, supported by 3 independent evidence type(s); further investigation is unlikely to change the recommendation.",
   "tool_calls": 6,
   "tokens": 0,
-  "latency_s": 0.053
+  "latency_s": 0.035
 }

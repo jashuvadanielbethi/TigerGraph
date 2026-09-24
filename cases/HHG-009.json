@@ -136,5 +136,5 @@
   "stop_reason": "Probability remains in the uncertain band after graph evidence and available verification; escalating to a human analyst per R8 rather than continuing indefinitely (Policy Section 6).",
   "tool_calls": 6,
   "tokens": 0,
-  "latency_s": 0.042
+  "latency_s": 0.081
 }

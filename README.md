@@ -1,144 +1,173 @@
 # TigerGraph Agentic Fraud Investigation Agent (HHGOA)
 
 An agent that investigates the 20 HHGOA case-pack alerts against the full
-IEEE-CIS-derived transaction dataset, using graph-native queries (TigerGraph
-GSQL, run locally against a pandas-backed equivalent index in this
-environment -- see below), GraphRAG grounding against the real fraud policy
-and pattern library, and Policy v1.0's exact rules (R1-R10) to produce the
-three-part answer file every case requires: the case record, a suspicious
-activity report when the policy calls for one, and the next-best-action
-before and after evidence-gathering.
+IEEE-CIS-derived transaction dataset. For every case it produces the
+three-part answer file the task requires: the **case** (verdict, pattern,
+evidence, exposure, connected cards, similar prior cases), a **suspicious
+activity report** when Fraud Policy v1.0 calls for one, and the **next best
+action** with its approval route both *before* and *after* any evidence it
+asks for.
 
-## Status: working end to end
+The 20 answer files are in [`cases/`](cases/) (`HHG-001.json` ...
+`HHG-020.json`).
+
+## How it works
+
+- **Fully rule-based; no LLM is used.** Fraud probability, pattern, actions,
+  and SAR are computed by deterministic Python over graph-style queries, so
+  results are reproducible (`tokens` is `0` in every answer file). There is
+  no agent framework either: the workflow is plain code in
+  `agent/investigate.py`.
+- **Graph queries run locally.** `agent/data_index.py` implements the five
+  queries (`card_window`, `device_neighbors`, `region_cluster`,
+  `similar_prior_cases`, `upsert_case`) against `data/processed/*.pkl`. The
+  matching GSQL (`schema/`) is written and ready to load into TigerGraph, but
+  this repo does **not** connect to a live TigerGraph instance. See
+  [`docs/mcp_integration.md`](docs/mcp_integration.md) for how to switch.
+  `written_to_graph` in the answer files means the case was written to this
+  local graph-shaped store, not to a live TigerGraph.
+- **Policy is encoded exactly.** Actions, approval routes (`auto`/`L1`/`L2`),
+  and the SAR trigger are in `agent/policy_engine.py`; rules R1-R10 are
+  applied in `agent/investigate.py`.
+
+## Run it end to end
+
+### 1. Prerequisites
+
+- Python 3.11+
+- The four HHGOA dataset files: `transactions.csv` (~700 MB),
+  `identity.csv`, `closed_cases_history.csv`, `case_pack.csv`
+- About 2 GB free RAM while building the index
+
+### 2. Install
 
 ```bash
-python data_ingest/build_index.py   # ~1 min: builds data/processed/*.pkl from the raw CSVs
-python run_case_pack.py             # runs all 20 cases, writes cases/HHG-0XX.json
-python -m pytest tests/ -q          # 9/9 passing, including a schema-validity smoke test on real output
+git clone https://github.com/jashuvadanielbethi/TigerGraph.git
+cd TigerGraph
+python -m venv .venv
+source .venv/Scripts/activate      # Windows Git Bash; on macOS/Linux: source .venv/bin/activate
+pip install -r requirements.txt
 ```
 
-All 20 answer files are already in [`cases/`](cases/). They pass a full
-schema/consistency validation pass (every field present, every ID real,
-`SAR.file` agrees with whether `FILE_REPORT` is recommended, legitimate
-verdicts carry zero exposure, no duplicate actions) and split roughly
-10 fraud / 10 legitimate, matching the dataset README's own hint that
-"half the cases are legitimate."
+### 3. Point the code at your dataset
 
-## Why this doesn't hit a live TigerGraph instance (yet)
+Copy the four CSVs into `data/raw/`, then create your env file:
 
-I don't have a TigerGraph account, and creating one isn't something I can
-do on your behalf. `schema/schema.gsql`, `schema/loading_jobs.gsql`, and
-`schema/queries/*.gsql` are written against the dataset's suggested graph
-schema and are ready to load once you have a Savanna workspace or
-Community Edition instance running. Until then, `agent/data_index.py`
-implements the exact same five queries (`card_window`, `device_neighbors`,
-`region_cluster`, `similar_prior_cases`, plus the `upsert_case` write-back)
-against `data/processed/*.pkl`, built from your raw CSVs by
-`data_ingest/build_index.py`. Every investigation function
-(`agent/patterns.py`, `agent/investigate.py`) calls only those five methods,
-so switching to a live graph is a contained change -- see
-[`docs/mcp_integration.md`](docs/mcp_integration.md) for the exact mapping
-and the steps to actually do it once you're on Savanna.
+```bash
+cp .env.example .env
+```
 
-`case.written_to_graph` is `true` for every answer because each case genuinely
-is written into a graph-shaped store (`Case`/`Evidence`/`Decision` records
-that later cases in the same run retrieve as case memory -- see
-`agent_case_memory` in `run_case_pack.py`); it isn't yet a live TigerGraph
-write. Re-run against a real instance (`AGENT_MODE=live` in `.env`) to make
-that literal.
+The defaults in `.env` (`TXN_CSV=data/raw/transactions.csv`, etc.) already
+match that layout. If your CSVs live somewhere else, edit those four paths in
+`.env`. Leave `AGENT_MODE=mock` and leave the TigerGraph / LLM keys blank;
+they are not needed.
 
-## What you still need to do
+### 4. Build the index (once, ~1 minute)
 
-1. **Create a TigerGraph Savanna or Community Edition instance** (I can't
-   create accounts). Sign up at https://savanna.tgcloud.io or install from
-   https://dl.tigergraph.com, fill in `.env` (`TG_HOST`/`TG_USERNAME`/`TG_PASSWORD`),
-   then `gsql schema/schema.gsql && gsql schema/loading_jobs.gsql`, run
-   `python data_ingest/stage_for_gsql.py`, and run the loading job.
-2. **Set an LLM API key** if you want narrative polish
-   (`ANTHROPIC_API_KEY`/`OPENAI_API_KEY` in `.env`). The pipeline is fully
-   deterministic without one -- every `fraud_probability` and evidence claim
-   is computed from real graph facts, not an LLM judgment call, so the 20
-   answer files don't require an API key at all. `agent/llm.py` is wired
-   for when you want it (e.g. to polish the SAR narrative prose).
-3. **Record the demo video** -- see [`docs/demo_script.md`](docs/demo_script.md)
-   for a shot list. Point it at `cases/*.json` and, once you've loaded a
-   live TigerGraph instance, GraphStudio showing the written-back `Case`
-   vertices.
-4. **Write the blog post and social post, and submit the form.** Draft in
-   [`docs/blog_post_draft.md`](docs/blog_post_draft.md).
-5. **The analyst dashboard / UI** -- built. `streamlit run ui/app.py`
-   (or use `.claude/launch.json`'s `dashboard` config). Three tabs:
-   *Overview* (fraud/legitimate split, pattern distribution, sortable case
-   table), *Case detail* (evidence, case-memory hits, before/after
-   next-best-action with what-changed, SAR narrative, raw JSON), and
-   *New investigation* (runs the live pipeline against any transaction ID
-   in the dataset, not just the 20 case-pack cases -- the optional
-   "monitor beyond the 20 cases" capability from the dataset README).
-   Visual design pass: Apple-style typography/spacing (`-apple-system`
-   font stack, generous rounded cards, soft shadows) with Blinkit-style
-   accent color, pill segmented tabs, custom line-icon SVG badges, and a
-   pop-in/pulse-ring animation on every verdict reveal -- including a
-   "order confirmed"-style success flash on the New investigation panel.
-   Presentation only; nothing in `agent/`, `data_ingest/`, or `schema/`
-   changed for this pass.
+```bash
+python data_ingest/build_index.py
+```
+
+Expected output ends with:
+
+```
+77.6% of transactions sit on a ground-truth-verified card_id
+OK: every case_pack.csv flagged_txn_id exists in transactions.csv.
+OK: case_pack flagged_txn_id -> card_id resolution mismatches: 0 / 20
+```
+
+This writes `data/processed/*.pkl` (gitignored).
+
+### 5. Run the 20 cases
+
+```bash
+python run_case_pack.py                  # all 20 -> cases/HHG-001.json ... HHG-020.json
+python run_case_pack.py --case HHG-011   # a single case
+```
+
+Expected result: 20 files written; 10 fraud / 10 legitimate; 3 SARs filed.
+
+### 6. Run the tests
+
+```bash
+python -m pytest tests/ -q
+```
+
+Expected: `9 passed`. The smoke test re-runs all 20 cases and checks every
+answer for schema validity, real IDs, no duplicate actions, and that
+`sar.file` agrees with whether `FILE_REPORT` is recommended.
+
+### 7. (Optional) Dashboard
+
+```bash
+streamlit run ui/app.py
+```
+
+Open http://localhost:8501. Tabs: **Overview**, **Case detail** (evidence,
+before/after next best action, SAR), and **New investigation** (enter any
+transaction ID from the dataset to investigate it live; a red "Detected
+Fraud" or green "Safe" popup shows the verdict).
+
+## Answer file format
+
+Each `cases/<case_id>.json` follows the dataset's Answer Format:
+`case` (status, verdict, `fraud_probability`, `pattern`, `affected_txn_ids`,
+`connected_card_ids`, `exposure_usd`, `evidence`, `similar_prior_cases`,
+`summary`, ...), `evidence_requests`, `next_best_actions` (`initial`,
+`final`, `what_changed`), `sar`, `stop_reason`, `tool_calls`, `tokens`,
+`latency_s`. Customer replies are not provided in the dataset, so any
+evidence request records the assumed response in
+`evidence_requests[].assumed_response`.
+
+## Optional: load into a live TigerGraph
+
+Not required for the steps above. If you have a Savanna workspace or
+Community Edition instance:
+
+```bash
+python data_ingest/stage_for_gsql.py     # writes flat CSVs to data/staged/
+gsql schema/schema.gsql
+gsql schema/loading_jobs.gsql
+bash schema/install_queries.sh
+```
+
+Then follow [`docs/mcp_integration.md`](docs/mcp_integration.md) to point the
+agent at it. The agent itself does not talk to TigerGraph yet.
 
 ## Repo layout
 
 | Path | What it is |
 |---|---|
-| `schema/schema.gsql` | Graph schema: Customer/Card/Transaction/DeviceProfile/EmailDomain/BillingRegion/ClosedCase (the dataset's suggested schema) + Case/Evidence/Decision (agent case memory) |
-| `schema/loading_jobs.gsql`, `schema/queries/*.gsql` | Loading job + the 5 GSQL queries the agent's local index mirrors |
-| `data_ingest/build_index.py` | Raw CSVs -> `data/processed/*.pkl`. Also where card_id ground-truth resolution happens -- **read this file's docstring**, it explains a real data-quality trap in the dataset (see below) |
-| `data_ingest/stage_for_gsql.py` | `data/processed/*.pkl` -> flat CSVs for `schema/loading_jobs.gsql` |
-| `agent/data_index.py` | The graph query layer (local now, live TigerGraph later -- same interface) |
-| `agent/patterns.py` | Pattern-detection heuristics (card testing, CNP anomaly, new device, out-of-region, device ring) |
-| `agent/policy_engine.py` | Fraud Policy v1.0's action list + approval routing + SAR trigger, encoded exactly |
-| `agent/investigate.py` | The per-case pipeline: evidence gathering -> probability scoring -> policy rules (R1-R10) -> evidence-gathering loop -> answer assembly |
-| `agent/graphrag.py` | GraphRAG: TF-IDF retrieval over the real policy/pattern docs and the 5,565 closed-case analyst narratives |
-| `run_case_pack.py` | Runs all 20 cases, writes `cases/*.json` |
-| `ui/app.py` | Streamlit analyst dashboard (overview, case detail, live new-investigation panel) |
-| `docs/fraud_policy.md`, `docs/fraud_patterns.md` | The real Policy v1.0 and pattern-library text, verbatim from the dataset README |
+| `cases/` | The 20 answer files (the submission output) |
+| `run_case_pack.py` | Runs all 20 cases and writes `cases/*.json` |
+| `agent/investigate.py` | Per-case pipeline: evidence, probability, policy rules, evidence requests, answer |
+| `agent/patterns.py` | Card testing, CNP anomaly, new device, out-of-region, device ring |
+| `agent/policy_engine.py` | Fraud Policy v1.0 actions, routes, SAR trigger |
+| `agent/data_index.py` | Graph query layer (local now, TigerGraph-ready) |
+| `agent/graphrag.py` | TF-IDF retrieval over the policy, patterns, and closed-case notes |
+| `data_ingest/build_index.py` | Raw CSVs to `data/processed/*.pkl` |
+| `data_ingest/stage_for_gsql.py` | Processed data to CSVs for the GSQL loading job |
+| `schema/` | GSQL schema, loading job, and the five queries |
+| `ui/app.py` | Streamlit dashboard |
+| `tests/` | Policy unit tests and the 20-case smoke test |
+| `docs/` | Architecture, policy and pattern text, MCP notes, demo script, blog draft |
 
-## Two real data-quality findings worth knowing about
+## Two data traps handled in the code
 
-Both are documented where they're fixed, because they'd silently produce
-wrong answers if missed:
+1. **`card_id` is not in the raw data**, and time-ordering can't rebuild it
+   because `TransactionDT` was deliberately perturbed. It is resolved by
+   propagating the real `card_id` values in `closed_cases_history.csv` and
+   `case_pack.csv` to every transaction with the same card tuple. See
+   `resolve_card_ids` in `data_ingest/build_index.py`.
+2. **Most `DeviceInfo` values are generic** (`Windows` alone is 47,741 rows),
+   so they are not treated as device fingerprints. Only specific values such
+   as Android `Build/...` strings are used for device-ring detection. See
+   `is_specific_device_info` in the same file.
 
-1. **`card_id` isn't in the raw transaction data and can't be reconstructed
-   by transaction-time ordering.** `TransactionDT` was deliberately
-   perturbed by the dataset publisher, which scrambles the fine-grained
-   order between two cards used close together in time -- a naive
-   "first-seen order per customer" guess was right only ~50% of the time
-   when a customer has 2+ cards. The fix: `closed_cases_history.csv` and
-   `case_pack.csv` both give real, ground-truth `card_id` values for
-   specific transaction IDs; propagating those to every other transaction
-   with the exact same `(customer_id, card1..card6)` tuple resolves
-   `card_id` for 77.6% of the whole dataset with zero guessing. See
-   `data_ingest/build_index.py:resolve_card_ids`.
-2. **Most `DeviceInfo` values are generic OS buckets, not device
-   fingerprints.** `"Windows"` alone appears on 47,741 identity records --
-   treating it as a shared-device signal would link nearly every desktop
-   Chrome user in the dataset into one fake "ring." Only Android
-   `Build/...` strings (and other genuinely rare values) are specific
-   enough to use for device-ring detection; see
-   `data_ingest/build_index.py:is_specific_device_info`. This one actually
-   broke the first version of the pipeline (11/20 cases spuriously called
-   `undocumented` ring fraud) before it was caught and fixed.
+## Limitations
 
-## Quickstart
-
-```bash
-python -m venv .venv
-source .venv/Scripts/activate   # .venv\Scripts\activate on native Windows shells
-pip install -r requirements.txt
-cp .env.example .env            # fill in TG_HOST/TG_USERNAME/TG_PASSWORD once you have Savanna/CE,
-                                 # and TXN_CSV/IDENTITY_CSV/CLOSED_CASES_CSV/CASE_PACK_CSV if your
-                                 # raw files aren't under data/raw/
-
-python data_ingest/build_index.py
-python run_case_pack.py                    # all 20 cases
-python run_case_pack.py --case HHG-011     # a single case, for debugging
-python -m pytest tests/ -q
-
-streamlit run ui/app.py                    # analyst dashboard
-```
+- No live TigerGraph connection and no LLM (see "How it works").
+- Customer/analyst replies are simulated, and the assumption is recorded per
+  case.
+- Region-based ring detection is deliberately not scored because it produced
+  false positives in busy billing regions.

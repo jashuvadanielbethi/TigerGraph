@@ -108,17 +108,33 @@ before/after next best action, SAR), and **New investigation** (enter any
 transaction ID from the dataset to investigate it live; a red "Detected
 Fraud" or green "Safe" popup shows the verdict).
 
-## Deploy to Vercel (read-only results site)
+## Deploy to Vercel (results site with New investigation)
 
 The Streamlit dashboard cannot run on Vercel (it needs a long-running server
-and the 700 MB dataset). Instead the repo ships a static, read-only site in
-[`public/`](public/) that shows the 20 answer files (overview, case detail,
-next best action before/after, SAR, and the Detected Fraud / Safe popup).
-`vercel.json` tells Vercel to skip Python detection and just serve `public/`.
+and the 700 MB dataset). The repo ships a static site in [`public/`](public/)
+with three tabs: **Overview**, **Case detail**, and **New investigation**
+(glass-style form; a red "Detected Fraud" or green "Safe" popup shows the
+verdict). `vercel.json` tells Vercel to skip Python detection and serve
+`public/`.
 
-1. Import the GitHub repo in Vercel with all defaults. No framework, build
-   command, or environment variables are needed.
+1. Import the GitHub repo in Vercel with all defaults (no framework, build
+   command, or environment variables).
 2. Deploy.
+
+**How New investigation finds a transaction:** it calls the investigation
+backend, and if that is unreachable it falls back to the saved results for the
+20 case-pack transactions. So on the deployed site, the 20 case-pack
+transaction IDs always work; to investigate **any** transaction in the
+dataset, start the backend on your machine (after step 4 above) and keep it
+running while you use the page:
+
+```bash
+python api_server.py      # http://localhost:8000, wraps the same pipeline
+```
+
+Then open the Vercel site (or `public/index.html` served locally) in the same
+browser and enter any transaction ID. Use `?api=http://host:port` on the page
+URL to point at a backend elsewhere.
 
 If you change `cases/`, refresh the site's copy with
 `cp cases/*.json public/cases/` and commit.

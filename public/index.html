@@ -50,6 +50,18 @@ h3{margin:0 0 10px;letter-spacing:-.02em}
 @keyframes life{0%{opacity:0}8%{opacity:1}82%{opacity:1}100%{opacity:0;visibility:hidden}}
 @keyframes ring{0%{transform:scale(.85);opacity:.7}100%{transform:scale(1.5);opacity:0}}
 @keyframes shake{0%,100%{transform:none}20%{transform:translateX(-9px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(3px)}}
+
+.glass{position:relative;overflow:hidden;padding:26px;border-radius:26px;border:1px solid rgba(255,255,255,.6);background:radial-gradient(420px 260px at 8% 10%,rgba(12,157,69,.38),transparent 70%),radial-gradient(380px 300px at 92% 18%,rgba(10,132,255,.32),transparent 70%),radial-gradient(360px 280px at 70% 105%,rgba(191,90,242,.3),transparent 70%),linear-gradient(135deg,#eaf7ee,#eaf1ff 55%,#f4eaff);box-shadow:0 24px 60px -24px rgba(20,40,90,.35);margin-bottom:18px}
+.glass .row2{display:grid;grid-template-columns:1fr 1fr;gap:16px}@media(max-width:640px){.glass .row2{grid-template-columns:1fr}}
+.glass label{display:block;font-weight:700;font-size:.85rem;margin:0 0 7px}
+.glass input,.glass select,.glass textarea{width:100%;min-width:0;padding:13px 15px;border-radius:16px;border:1px solid rgba(255,255,255,.8);background:rgba(255,255,255,.42);-webkit-backdrop-filter:blur(16px) saturate(170%);backdrop-filter:blur(16px) saturate(170%);box-shadow:0 8px 24px -10px rgba(20,40,90,.28),inset 0 1px 0 rgba(255,255,255,.85);font:500 1rem inherit;font-family:inherit;color:var(--ink);outline:none;transition:.2s}
+.glass textarea{resize:vertical;min-height:84px;margin-bottom:6px}
+.glass input::placeholder{color:rgba(29,29,31,.45)}
+.glass input:focus,.glass select:focus,.glass textarea:focus{background:rgba(255,255,255,.65);border-color:rgba(12,157,69,.85);box-shadow:0 0 0 4px rgba(12,157,69,.18),0 10px 28px -10px rgba(12,157,69,.4)}
+.glass .go{margin-top:12px;padding:14px 38px;border:1px solid rgba(255,255,255,.55);border-radius:999px;background:linear-gradient(135deg,rgba(12,157,69,.95),rgba(8,122,53,.95));color:#fff;font:700 1rem inherit;font-family:inherit;cursor:pointer;box-shadow:0 14px 30px -10px rgba(12,157,69,.65),inset 0 1px 0 rgba(255,255,255,.45);transition:.15s}
+.glass .go:hover{transform:translateY(-3px) scale(1.02)}.glass .go:active{transform:scale(.96)}.glass .go:disabled{opacity:.6;cursor:wait}
+.msg{padding:14px 18px;border-radius:16px;background:rgba(255,59,48,.08);border:1px solid rgba(255,59,48,.25);color:#b3261e;margin-bottom:14px;font-size:.9rem;line-height:1.5}
+.done{display:flex;align-items:center;gap:12px;padding:14px 18px;border-radius:18px;background:linear-gradient(135deg,rgba(12,157,69,.1),rgba(12,157,69,.02));border:1px solid rgba(12,157,69,.25);margin-bottom:8px;animation:pop .55s cubic-bezier(.34,1.56,.64,1) both}
 .note{color:var(--soft);font-size:.8rem;margin-top:26px;line-height:1.5}
 pre{background:#101113;color:#e6e6e6;padding:16px;border-radius:14px;overflow:auto;font-size:.78rem;max-height:520px}
 </style>
@@ -58,9 +70,9 @@ pre{background:#101113;color:#e6e6e6;padding:16px;border-radius:14px;overflow:au
 <div class="wrap">
   <div class="hero"><i><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-4.35-4.35"/></svg></i>
     <div><h1>TigerGraph Agentic Fraud Investigation</h1><p>HHGOA case pack &middot; 20 graded cases investigated under Fraud Policy v1.0</p></div></div>
-  <div class="tabs"><button id="t-over" class="on">Overview</button><button id="t-det">Case detail</button></div>
+  <div class="tabs"><button id="t-over" class="on">Overview</button><button id="t-det">Case detail</button><button id="t-new">New investigation</button></div>
   <div id="app"></div>
-  <p class="note">Read-only view of the 20 answer files in <code>cases/</code>. Live investigation of any transaction ID runs in the Python dashboard (<code>streamlit run ui/app.py</code>) because it needs the 590K-transaction dataset; see the README.</p>
+  <p class="note">Overview and case detail show the 20 answer files in <code>cases/</code>. New investigation runs any transaction ID from the dataset through the agent (see the README to start the local backend).</p>
 </div>
 <script>
 const IDS=Array.from({length:20},(_,i)=>"HHG-"+String(i+1).padStart(3,"0"));
@@ -87,15 +99,13 @@ function overview(){
   document.querySelectorAll("tr.row").forEach(r=>r.onclick=()=>{current=r.dataset.id;show("det");popup(cases[current].case.verdict,current)});
 }
 function actions(list){return list.map(a=>`<div class="act"><div><b>${esc(title(a.action).toLowerCase().replace(/^./,c=>c.toUpperCase()))}</b><small>${esc(a.reason)}</small></div><span class="badge route-${a.route}" style="white-space:nowrap;height:fit-content">${ROUTE[a.route]}</span></div>`).join("")}
-function detail(){
-  const a=cases[current],c=a.case;
-  const opts=IDS.map(i=>`<option value="${i}" ${i===current?"selected":""}>${i} — ${V[cases[i].case.verdict][0]}</option>`).join("");
+function caseHTML(a,id){
+  const c=a.case;
   const ev=c.evidence.map(e=>`<tr><td>${esc(e.source)}</td><td>${esc(e.claim)}</td><td>${esc(e.ref)}</td></tr>`).join("");
   const stats=[["Fraud probability",c.fraud_probability.toFixed(2)],["Exposure","$"+c.exposure_usd.toFixed(2)],["Pattern",title(c.pattern)],["Status",title(c.status)],["SAR filed",a.sar.file?"Yes":"No"]].map((x,i)=>`<div class="stat" style="animation-delay:${i*.04}s"><b>${x[0]}</b><span>${esc(x[1])}</span></div>`).join("");
   const req=a.evidence_requests.length?a.evidence_requests.map(r=>`<span class="chip">${esc(r.type)}</span> ${esc(r.assumed_response)}`).join("<br>"):"None requested — initial evidence was sufficient to decide.";
   const sar=a.sar.file?`<div class="card sar"><b style="color:var(--danger)">Suspicious Activity Report filed</b><p><b>Reason:</b> ${esc(a.sar.reason)}</p><p><b>Subjects:</b> ${esc(a.sar.subjects.join(", "))}</p><p><b>Total:</b> $${a.sar.total_amount_usd.toFixed(2)} &middot; <b>Dates:</b> ${esc(a.sar.activity_dates.join(" to "))}</p><p style="color:var(--soft)">${esc(a.sar.narrative)}</p></div>`:`<div class="card">No SAR filed. ${esc(a.sar.reason)}</div>`;
-  $("#app").innerHTML=`<select id="pick">${opts}</select>
-  <div style="display:flex;gap:12px;align-items:center;margin:16px 0 4px"><h3 style="margin:0">${current}</h3>${badge(c.verdict)}</div>
+  return `<div style="display:flex;gap:12px;align-items:center;margin:16px 0 4px"><h3 style="margin:0">${esc(id)}</h3>${badge(c.verdict)}</div>
   <div class="grid">${stats}</div><div class="quote">${esc(c.summary)}</div>
   ${c.pattern==="undocumented"&&c.pattern_description?`<div class="card" style="border-left:3px solid var(--warn)"><b>Undocumented pattern</b><p style="color:var(--soft);font-size:.88rem">${esc(c.pattern_description)}</p></div>`:""}
   ${c.connected_card_ids.length?`<p><b style="font-size:.85rem">Connected cards (shared origin)</b><br>${c.connected_card_ids.map(x=>`<span class="chip">${esc(x)}</span>`).join("")}</p>`:""}
@@ -105,10 +115,50 @@ function detail(){
     <p><b>Evidence requests:</b> ${req}</p><p><b>Stop reason:</b> ${esc(a.stop_reason)}</p>
     <small style="color:var(--soft)">tool_calls=${a.tool_calls} &middot; tokens=${a.tokens} &middot; latency=${a.latency_s}s</small></div>
   ${sar}<details class="card"><summary><b>Raw JSON</b></summary><pre>${esc(JSON.stringify(a,null,2))}</pre></details>`;
+}
+function detail(){
+  const opts=IDS.map(i=>`<option value="${i}" ${i===current?"selected":""}>${i} — ${V[cases[i].case.verdict][0]}</option>`).join("");
+  $("#app").innerHTML=`<select id="pick">${opts}</select>`+caseHTML(cases[current],current);
   $("#pick").onchange=e=>{current=e.target.value;detail();popup(cases[current].case.verdict,current)};
 }
-function show(t){$("#t-over").classList.toggle("on",t==="over");$("#t-det").classList.toggle("on",t==="det");t==="over"?overview():detail()}
-$("#t-over").onclick=()=>show("over");$("#t-det").onclick=()=>show("det");
+
+const API=new URLSearchParams(location.search).get("api")||"http://localhost:8000";
+let caseIndex={};
+fetch("cases/index.json").then(r=>r.json()).then(j=>caseIndex=j).catch(()=>{});
+function newInv(){
+  $("#app").innerHTML=`<form class="glass" id="f" autocomplete="off">
+    <div class="row2"><div><label for="txn">Transaction ID</label><input id="txn" inputmode="numeric" placeholder="e.g. 3514030" autofocus></div>
+    <div><label for="trg">Trigger</label><select id="trg"><option>risk_score</option><option>customer_report</option><option>analyst_request</option></select></div></div>
+    <label for="txt" style="margin-top:16px">Trigger text</label><textarea id="txt">Manually triggered from the analyst dashboard.</textarea>
+    <button class="go" id="go" type="submit">Investigate</button></form><div id="res"></div>`;
+  $("#f").onsubmit=async e=>{
+    e.preventDefault();
+    const id=$("#txn").value.trim(),res=$("#res"),btn=$("#go");
+    if(!/^\d+$/.test(id)){res.innerHTML='<div class="msg">Enter a numeric transaction ID.</div>';return}
+    btn.disabled=true;btn.textContent="Investigating…";res.innerHTML="";
+    try{
+      const a=await lookup(id,$("#trg").value,$("#txt").value);
+      res.innerHTML=`<div class="done"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#0c9d45" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8.5 12.5 2.3 2.3L16 9.5"/></svg><div><b>Investigation complete</b><br><small style="color:var(--soft)">${a.latency_s}s &middot; ${a.tool_calls} graph query calls &middot; ${esc(a.case_id)}${a._src?" &middot; "+esc(a._src):""}</small></div></div>`+caseHTML(a,a.case_id);
+      popup(a.case.verdict,a.case_id);
+    }catch(err){res.innerHTML=`<div class="msg">${esc(err.message)}</div>`}
+    btn.disabled=false;btn.textContent="Investigate";
+  };
+}
+async function lookup(id,trigger,text){
+  let live=null;
+  try{
+    const r=await fetch(`${API}/investigate?txn=${id}&trigger=${trigger}&text=${encodeURIComponent(text)}`,{signal:AbortSignal.timeout(20000)});
+    const j=await r.json();
+    if(!r.ok)throw new Error(j.error||"Request failed");
+    return j;
+  }catch(e){live=e;if(e.name!=="TypeError"&&e.name!=="TimeoutError"&&e.name!=="AbortError")throw e}
+  const known=caseIndex[id];
+  if(known){const a=await fetch(`cases/${known.case}.json`).then(r=>r.json());a._src=`saved ${known.case} result (${known.trigger} trigger)`;return a}
+  throw new Error("The investigation backend is not reachable, so only the 20 case-pack transactions can be looked up here. To investigate any transaction, run `python api_server.py` on your machine and reload this page (see the README).");
+}
+
+function show(t){["over","det","new"].forEach(k=>$("#t-"+k).classList.toggle("on",t===k));t==="over"?overview():t==="det"?detail():newInv()}
+$("#t-over").onclick=()=>show("over");$("#t-det").onclick=()=>show("det");$("#t-new").onclick=()=>show("new");
 Promise.all(IDS.map(i=>fetch(`cases/${i}.json`).then(r=>r.json()).then(j=>cases[i]=j))).then(()=>show("over")).catch(e=>{$("#app").innerHTML=`<div class="card">Could not load case files: ${esc(e)}</div>`});
 </script>
 </body>

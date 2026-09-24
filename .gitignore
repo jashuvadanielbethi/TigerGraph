@@ -6,3 +6,4 @@ data/raw/
 data/staged/
 data/processed/
 .pytest_cache/
+precompute.log

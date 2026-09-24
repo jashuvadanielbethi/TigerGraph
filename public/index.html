@@ -121,8 +121,6 @@ function detail(){
 }
 
 const API=new URLSearchParams(location.search).get("api")||"http://localhost:8000";
-let caseIndex={};
-fetch("cases/index.json").then(r=>r.json()).then(j=>caseIndex=j).catch(()=>{});
 function newInv(){
   $("#app").innerHTML=`<form class="glass" id="f" autocomplete="off">
     <div class="row2"><div><label for="txn">Transaction ID</label><input id="txn" inputmode="numeric" placeholder="e.g. 3514030" autofocus></div>
@@ -135,26 +133,48 @@ function newInv(){
     if(!/^\d+$/.test(id)){res.innerHTML='<div class="msg">Enter a numeric transaction ID.</div>';return}
     btn.disabled=true;btn.textContent="Investigating…";res.innerHTML="";
     try{
-      const a=await lookup(id,$("#trg").value,$("#txt").value);
-      res.innerHTML=`<div class="done"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#0c9d45" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8.5 12.5 2.3 2.3L16 9.5"/></svg><div><b>Investigation complete</b><br><small style="color:var(--soft)">${a.latency_s}s &middot; ${a.tool_calls} graph query calls &middot; ${esc(a.case_id)}${a._src?" &middot; "+esc(a._src):""}</small></div></div>`+caseHTML(a,a.case_id);
-      popup(a.case.verdict,a.case_id);
+      const r=await lookup(id,$("#trg").value,$("#txt").value);
+      const banner=(sub)=>`<div class="done"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#0c9d45" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8.5 12.5 2.3 2.3L16 9.5"/></svg><div><b>Investigation complete</b><br><small style="color:var(--soft)">${sub}</small></div></div>`;
+      if(r.full){const a=r.full;res.innerHTML=banner(`${a.latency_s}s &middot; ${a.tool_calls} graph query calls &middot; ${esc(a.case_id)}`)+caseHTML(a,a.case_id);popup(a.case.verdict,a.case_id)}
+      else{res.innerHTML=banner(`Transaction ${esc(id)} &middot; ${esc(r.trigger)} trigger`)+compactHTML(r.compact,id,r.trigger);popup(VMAP[r.compact[0]],"LIVE-"+id)}
     }catch(err){res.innerHTML=`<div class="msg">${esc(err.message)}</div>`}
     btn.disabled=false;btn.textContent="Investigate";
   };
 }
+const PAT=["none","card_testing","card_not_present_fraud","card_not_present_new_device","out_of_region_use","account_takeover","undocumented"];
+const STAT=["open","closed_fraud","closed_legitimate","escalated"];
+const ACT=["ALLOW_TRANSACTION","DECLINE_TRANSACTION","MONITOR_CARD","MONITOR_CONNECTED_CARDS","WARN_CUSTOMER","VERIFY_WITH_CUSTOMER","STEP_UP_AUTH","BLOCK_CARD","BLOCK_ALL_CARDS","GENERATE_REPORT","CREATE_CASE","FILE_REPORT","ESCALATE_TO_ANALYST","CLOSE_NO_FRAUD"];
+const VMAP={f:"fraud",l:"legitimate",u:"uncertain"};
+const ERTXT=["No additional evidence was requested.","Customer validation requested; assumed response: customer confirms the transaction.","Customer validation requested; assumed response: customer denies the transaction.","Analyst information requested; assumed response: scope confirmed."];
+function routeOf(a,exp){return ["DECLINE_TRANSACTION"].includes(ACT[a])?"L1":ACT[a]==="BLOCK_CARD"?(exp<=2500?"L1":"L2"):["BLOCK_ALL_CARDS","FILE_REPORT"].includes(ACT[a])?"L2":"auto"}
+function compactActs(list,exp){return list.map(([a,r])=>`<div class="act"><div><b>${esc(title(ACT[a]).toLowerCase().replace(/^./,c=>c.toUpperCase()))}</b><small>${r?"Policy rule "+esc(r):""}</small></div><span class="badge route-${routeOf(a,exp)}" style="white-space:nowrap;height:fit-content">${ROUTE[routeOf(a,exp)]}</span></div>`).join("")}
+function compactHTML(rec,id,trigger){
+  const [v,pp,pat,exp,st,sar,conn,init,fin,er,tc]=rec,verdict=VMAP[v],prob=pp/100;
+  const stats=[["Fraud probability",prob.toFixed(2)],["Exposure","$"+exp.toFixed(2)],["Pattern",title(PAT[pat])],["Status",title(STAT[st])],["SAR filed",sar?"Yes":"No"]].map((x,i)=>`<div class="stat" style="animation-delay:${i*.04}s"><b>${x[0]}</b><span>${esc(x[1])}</span></div>`).join("");
+  const sum=`Transaction ${id} (${trigger} trigger): verdict ${verdict}, fraud probability ${prob.toFixed(2)}.`+(verdict!=="legitimate"?` Pattern: ${title(PAT[pat])}. Exposure: $${exp.toFixed(2)}.`:"")+(conn.length?` Connected to ${conn.length} other card(s) via a shared device: ${conn.join(", ")}.`:"");
+  return `<div style="display:flex;gap:12px;align-items:center;margin:16px 0 4px"><h3 style="margin:0">LIVE-${esc(id)}</h3>${badge(verdict)}</div>
+  <div class="grid">${stats}</div><div class="quote">${esc(sum)}</div>
+  ${conn.length?`<p><b style="font-size:.85rem">Connected cards (shared origin)</b><br>${conn.map(x=>`<span class="chip">${esc(x)}</span>`).join("")}</p>`:""}
+  <div class="card"><h3>Next-best-action</h3><div class="two"><div><small style="color:var(--soft)">BEFORE EVIDENCE</small>${compactActs(init,exp)}</div><div><small style="color:var(--soft)">AFTER EVIDENCE</small>${compactActs(fin,exp)}</div></div>
+  <div class="quote"><b>Evidence:</b> ${esc(ERTXT[er])}</div><small style="color:var(--soft)">tool_calls=${tc} &middot; tokens=0</small></div>`;
+}
 async function lookup(id,trigger,text){
-  let live=null;
   try{
-    const r=await fetch(`${API}/investigate?txn=${id}&trigger=${trigger}&text=${encodeURIComponent(text)}`,{signal:AbortSignal.timeout(20000)});
+    const r=await fetch(`${API}/investigate?txn=${id}&trigger=${trigger}&text=${encodeURIComponent(text)}`,{signal:AbortSignal.timeout(1500)});
     const j=await r.json();
     if(!r.ok)throw new Error(j.error||"Request failed");
-    return j;
-  }catch(e){live=e;if(e.name!=="TypeError"&&e.name!=="TimeoutError"&&e.name!=="AbortError")throw e}
-  const known=caseIndex[id];
-  if(known){const a=await fetch(`cases/${known.case}.json`).then(r=>r.json());a._src=`saved ${known.case} result (${known.trigger} trigger)`;return a}
-  throw new Error("The investigation backend is not reachable, so only the 20 case-pack transactions can be looked up here. To investigate any transaction, run `python api_server.py` on your machine and reload this page (see the README).");
+    return {full:j};
+  }catch(e){if(e.name!=="TypeError"&&e.name!=="TimeoutError"&&e.name!=="AbortError")throw e}
+  const n=+id,shard=Math.floor(n/1000);
+  const r=await fetch(`lookup/${trigger}/${shard}.json`);
+  if(!r.ok){
+    if(n<3000001||n>3590742)throw new Error(`Transaction ${id} not found in the dataset.`);
+    throw new Error("Saved results for this transaction are still being prepared (they are generated in batches). Try again later, or run `python api_server.py` locally to investigate it now.");
+  }
+  const rec=(await r.json())[id];
+  if(!rec)throw new Error(`Transaction ${id} not found in the dataset.`);
+  return {compact:rec,trigger};
 }
-
 function show(t){["over","det","new"].forEach(k=>$("#t-"+k).classList.toggle("on",t===k));t==="over"?overview():t==="det"?detail():newInv()}
 $("#t-over").onclick=()=>show("over");$("#t-det").onclick=()=>show("det");$("#t-new").onclick=()=>show("new");
 show("new");

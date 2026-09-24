@@ -446,9 +446,6 @@ def render_case(case_id: str, answer: dict) -> None:
                              f'{er["assumed_response"]}', unsafe_allow_html=True)
         else:
             st.caption("None requested — initial evidence was sufficient to decide.")
-        st.markdown('<hr class="divider-soft">', unsafe_allow_html=True)
-        st.markdown("**Stop reason**")
-        st.write(answer["stop_reason"])
         st.caption(f"{icon('chip', 12)} tool_calls={answer['tool_calls']} · tokens={answer['tokens']} · "
                    f"latency={answer['latency_s']}s", unsafe_allow_html=True)
 
@@ -467,7 +464,7 @@ def render_case(case_id: str, answer: dict) -> None:
     with tab_sar:
         sar = answer["sar"]
         if not sar["file"]:
-            st.caption(f"No SAR filed. {sar['reason']}")
+            pass
         else:
             st.markdown(f"""
             <div class="card" style="border-left:3px solid var(--danger);">

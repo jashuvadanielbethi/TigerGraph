@@ -72,7 +72,6 @@ pre{background:#101113;color:#e6e6e6;padding:16px;border-radius:14px;overflow:au
     <div><h1>TigerGraph Agentic Fraud Investigation</h1><p>HHGOA case pack &middot; 20 graded cases investigated under Fraud Policy v1.0</p></div></div>
   <div class="tabs"><button id="t-over" class="on">Overview</button><button id="t-det">Case detail</button><button id="t-new">New investigation</button></div>
   <div id="app"></div>
-  <p class="note">Overview and case detail show the 20 answer files in <code>cases/</code>. New investigation runs any transaction ID from the dataset through the agent (see the README to start the local backend).</p>
 </div>
 <script>
 const IDS=Array.from({length:20},(_,i)=>"HHG-"+String(i+1).padStart(3,"0"));
@@ -104,7 +103,7 @@ function caseHTML(a,id){
   const ev=c.evidence.map(e=>`<tr><td>${esc(e.source)}</td><td>${esc(e.claim)}</td><td>${esc(e.ref)}</td></tr>`).join("");
   const stats=[["Fraud probability",c.fraud_probability.toFixed(2)],["Exposure","$"+c.exposure_usd.toFixed(2)],["Pattern",title(c.pattern)],["Status",title(c.status)],["SAR filed",a.sar.file?"Yes":"No"]].map((x,i)=>`<div class="stat" style="animation-delay:${i*.04}s"><b>${x[0]}</b><span>${esc(x[1])}</span></div>`).join("");
   const req=a.evidence_requests.length?a.evidence_requests.map(r=>`<span class="chip">${esc(r.type)}</span> ${esc(r.assumed_response)}`).join("<br>"):"None requested — initial evidence was sufficient to decide.";
-  const sar=a.sar.file?`<div class="card sar"><b style="color:var(--danger)">Suspicious Activity Report filed</b><p><b>Reason:</b> ${esc(a.sar.reason)}</p><p><b>Subjects:</b> ${esc(a.sar.subjects.join(", "))}</p><p><b>Total:</b> $${a.sar.total_amount_usd.toFixed(2)} &middot; <b>Dates:</b> ${esc(a.sar.activity_dates.join(" to "))}</p><p style="color:var(--soft)">${esc(a.sar.narrative)}</p></div>`:`<div class="card">No SAR filed. ${esc(a.sar.reason)}</div>`;
+  const sar=a.sar.file?`<div class="card sar"><b style="color:var(--danger)">Suspicious Activity Report filed</b><p><b>Reason:</b> ${esc(a.sar.reason)}</p><p><b>Subjects:</b> ${esc(a.sar.subjects.join(", "))}</p><p><b>Total:</b> $${a.sar.total_amount_usd.toFixed(2)} &middot; <b>Dates:</b> ${esc(a.sar.activity_dates.join(" to "))}</p><p style="color:var(--soft)">${esc(a.sar.narrative)}</p></div>`:"";
   return `<div style="display:flex;gap:12px;align-items:center;margin:16px 0 4px"><h3 style="margin:0">${esc(id)}</h3>${badge(c.verdict)}</div>
   <div class="grid">${stats}</div><div class="quote">${esc(c.summary)}</div>
   ${c.pattern==="undocumented"&&c.pattern_description?`<div class="card" style="border-left:3px solid var(--warn)"><b>Undocumented pattern</b><p style="color:var(--soft);font-size:.88rem">${esc(c.pattern_description)}</p></div>`:""}
@@ -112,8 +111,7 @@ function caseHTML(a,id){
   <div class="card"><h3>Next-best-action</h3><div class="two"><div><small style="color:var(--soft)">BEFORE EVIDENCE</small>${actions(a.next_best_actions.initial)}</div><div><small style="color:var(--soft)">AFTER EVIDENCE</small>${actions(a.next_best_actions.final)}</div></div><div class="quote"><b>What changed:</b> ${esc(a.next_best_actions.what_changed)}</div></div>
   <div class="card"><h3>Evidence</h3><table><tr><th>Source</th><th>Claim</th><th>Ref</th></tr>${ev}</table>
     <p style="margin-top:14px"><b>Similar prior cases:</b> ${c.similar_prior_cases.map(x=>`<span class="chip">${esc(x)}</span>`).join("")||"none"}</p>
-    <p><b>Evidence requests:</b> ${req}</p><p><b>Stop reason:</b> ${esc(a.stop_reason)}</p>
-    <small style="color:var(--soft)">tool_calls=${a.tool_calls} &middot; tokens=${a.tokens} &middot; latency=${a.latency_s}s</small></div>
+    <p><b>Evidence requests:</b> ${req}</p><small style="color:var(--soft)">tool_calls=${a.tool_calls} &middot; tokens=${a.tokens} &middot; latency=${a.latency_s}s</small></div>
   ${sar}<details class="card"><summary><b>Raw JSON</b></summary><pre>${esc(JSON.stringify(a,null,2))}</pre></details>`;
 }
 function detail(){

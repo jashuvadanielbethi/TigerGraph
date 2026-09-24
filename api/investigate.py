@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import gzip
 import json
-import shutil
+import pickle
 import sys
 from http.server import BaseHTTPRequestHandler
 from pathlib import Path
@@ -26,21 +26,27 @@ import pandas as pd  # noqa: E402
 import agent.data_index as data_index  # noqa: E402
 from agent.investigate import investigate  # noqa: E402
 
-TMP = Path("/tmp/processed")
 TRIGGERS = {"risk_score", "customer_report", "analyst_request"}
 _idx = None
+
+
+class _PandasShim:
+    """pandas, except read_pickle() streams the gzipped dataset straight into
+    memory (Vercel's /tmp is too small to unpack it). The pipeline's own code
+    is untouched; only how data_index.py opens its three files changes."""
+
+    def __getattr__(self, name):
+        return getattr(pd, name)
+
+    def read_pickle(self, path, *args, **kwargs):
+        with gzip.open(ROOT / "data" / "deploy" / f"{Path(path).stem}.pkl.gz", "rb") as f:
+            return pickle.load(f)
 
 
 def _index():
     global _idx
     if _idx is None:
-        TMP.mkdir(parents=True, exist_ok=True)
-        for name in ("transactions", "identity", "closed_cases"):
-            out = TMP / f"{name}.pkl"
-            if not out.exists():
-                with gzip.open(ROOT / "data" / "deploy" / f"{name}.pkl.gz", "rb") as src, open(out, "wb") as dst:
-                    shutil.copyfileobj(src, dst)
-        data_index.PROCESSED_DIR = TMP
+        data_index.pd = _PandasShim()
         _idx = data_index.get_index()
     return _idx
 

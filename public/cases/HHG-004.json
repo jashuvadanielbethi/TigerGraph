@@ -1,0 +1,165 @@
+{
+  "case_id": "HHG-004",
+  "case": {
+    "status": "closed_fraud",
+    "verdict": "fraud",
+    "fraud_probability": 0.97,
+    "pattern": "card_not_present_new_device",
+    "pattern_description": "",
+    "affected_txn_ids": [
+      "3580804",
+      "3583227",
+      "3583499",
+      "3583503",
+      "3584017",
+      "3585446",
+      "3585726",
+      "3587858"
+    ],
+    "first_suspicious_txn_id": "3580804",
+    "connected_card_ids": [],
+    "connected_device_profiles": [],
+    "exposure_usd": 384.43,
+    "evidence": [
+      {
+        "claim": "Card C08106-K1 has 216 known transactions on file ({'online': 216}).",
+        "source": "graph",
+        "ref": "query:card_window(card_id=C08106-K1)",
+        "entity_ids": [
+          "3016362",
+          "3022263",
+          "3032354",
+          "3041189",
+          "3041451",
+          "3041580",
+          "3042672",
+          "3043674",
+          "3044424",
+          "3053646",
+          "3057975",
+          "3060995",
+          "3061540",
+          "3062197",
+          "3062201",
+          "3070467",
+          "3074803",
+          "3078870",
+          "3079235",
+          "3083251"
+        ]
+      },
+      {
+        "claim": "Customer report: Customer C08106 message: 'I never made this $128.33 purchase. Please check my card.' Refers to 3583227.",
+        "source": "customer",
+        "ref": "case_pack.trigger_text",
+        "entity_ids": [
+          "3583227"
+        ]
+      },
+      {
+        "claim": "Online transaction inconsistent with this card's history: amount $128.33 is 3.3 standard deviations above this card's historical average ($35.31)",
+        "source": "graph",
+        "ref": "query:card_window(product/amount history)",
+        "entity_ids": [
+          "3583227"
+        ]
+      },
+      {
+        "claim": "8 online transactions on this card within a 48-hour window around the flagged transaction.",
+        "source": "graph",
+        "ref": "query:card_window(48h burst)",
+        "entity_ids": [
+          "3580804",
+          "3583227",
+          "3583499",
+          "3583503",
+          "3584017",
+          "3585446",
+          "3585726",
+          "3587858"
+        ]
+      },
+      {
+        "claim": "Identity record marks the device as New for this account",
+        "source": "graph",
+        "ref": "query:identity(id_15,id_23)",
+        "entity_ids": [
+          "3583227"
+        ]
+      },
+      {
+        "claim": "Similar closed case CC-0696 on this same customer was cleared as legitimate: Case CC-0696: model scored a $13.68 transaction at 0.83. Cardholder confirmed travel to the billing region in question. Alert cleared.",
+        "source": "graph",
+        "ref": "query:similar_prior_cases",
+        "entity_ids": []
+      },
+      {
+        "claim": "Similar closed case CC-1736 (card_not_present_fraud) on this customer/card/device/region was confirmed fraud: Case CC-1736: cardholder C08106 reported unrecognized activity on card C08106-K1. 1 transaction(s) between 2016-08-05 and 2016-08-05 totaling $9.90 were confirmed fraudulent. Online purchases inconsis",
+        "source": "graph",
+        "ref": "query:similar_prior_cases",
+        "entity_ids": []
+      },
+      {
+        "claim": "Similar closed case CC-2121 (card_not_present_fraud) on this customer/card/device/region was confirmed fraud: Case CC-2121: cardholder C08106 reported unrecognized activity on card C08106-K1. 1 transaction(s) between 2016-08-14 and 2016-08-14 totaling $102.68 were confirmed fraudulent. Online purchases incons",
+        "source": "graph",
+        "ref": "query:similar_prior_cases",
+        "entity_ids": []
+      },
+      {
+        "claim": "Relevant policy: ## 3. Card-not-present fraud from a new device",
+        "source": "document",
+        "ref": "fraud_patterns#6",
+        "entity_ids": []
+      }
+    ],
+    "similar_prior_cases": [
+      "CC-0696",
+      "CC-1736",
+      "CC-2121",
+      "CC-3778"
+    ],
+    "summary": "Case HHG-004 (customer_report) on card C08106-K1 (customer C08106): verdict fraud, fraud probability 0.97. Pattern: card_not_present_new_device. Exposure: $384.43. Key evidence: Card C08106-K1 has 216 known transactions on file ({'online': 216}). Online transaction inconsistent with this card's history: amount $128.33 is 3.3 standard deviations above this card's historical average ($35.31)",
+    "written_to_graph": true,
+    "graph_case_id": "CASE-HHG-004"
+  },
+  "evidence_requests": [],
+  "next_best_actions": {
+    "initial": [
+      {
+        "action": "BLOCK_CARD",
+        "route": "L1",
+        "reason": "R2: customer denies the transaction"
+      },
+      {
+        "action": "CREATE_CASE",
+        "route": "auto",
+        "reason": "R2: customer denial opens a case"
+      }
+    ],
+    "final": [
+      {
+        "action": "BLOCK_CARD",
+        "route": "L1",
+        "reason": "R2: customer denies the transaction"
+      },
+      {
+        "action": "CREATE_CASE",
+        "route": "auto",
+        "reason": "R2: customer denial opens a case"
+      }
+    ],
+    "what_changed": "nothing"
+  },
+  "sar": {
+    "file": false,
+    "reason": "Policy 3a: fraud probability 0.97 but exposure $384.43 is at or below $1,000 and the activity does not connect to a shared device/region cluster or another customer's fraud -- no SAR trigger met.",
+    "narrative": "",
+    "subjects": [],
+    "total_amount_usd": 0,
+    "activity_dates": []
+  },
+  "stop_reason": "Fraud probability 0.97 is at or above 0.85, supported by 6 independent evidence type(s) (['burst', 'cnp_anomaly', 'customer_report', 'new_device', 'similar_cleared_case', 'similar_confirmed_case']); further investigation is unlikely to change the recommended action.",
+  "tool_calls": 6,
+  "tokens": 0,
+  "latency_s": 0.042
+}

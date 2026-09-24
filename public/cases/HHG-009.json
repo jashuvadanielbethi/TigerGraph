@@ -1,0 +1,140 @@
+{
+  "case_id": "HHG-009",
+  "case": {
+    "status": "closed_fraud",
+    "verdict": "fraud",
+    "fraud_probability": 0.8,
+    "pattern": "card_not_present_fraud",
+    "pattern_description": "",
+    "affected_txn_ids": [
+      "3581141"
+    ],
+    "first_suspicious_txn_id": "3581141",
+    "connected_card_ids": [],
+    "connected_device_profiles": [],
+    "exposure_usd": 30.02,
+    "evidence": [
+      {
+        "claim": "Card C08299-K1 has 56 known transactions on file ({'online': 50, 'in_person': 6}).",
+        "source": "graph",
+        "ref": "query:card_window(card_id=C08299-K1)",
+        "entity_ids": [
+          "3008420",
+          "3029127",
+          "3034459",
+          "3036600",
+          "3037041",
+          "3048209",
+          "3072009",
+          "3076269",
+          "3076305",
+          "3078147",
+          "3080225",
+          "3083864",
+          "3089258",
+          "3114008",
+          "3114222",
+          "3116388",
+          "3138351",
+          "3147680",
+          "3151767",
+          "3166999"
+        ]
+      },
+      {
+        "claim": "Customer report: Customer C08299 message: 'I never made this $30.02 purchase. Please check my card.' Refers to 3581141.",
+        "source": "customer",
+        "ref": "case_pack.trigger_text",
+        "entity_ids": [
+          "3581141"
+        ]
+      },
+      {
+        "claim": "Similar closed case CC-0084 (account_takeover) on this customer/card/device/region was confirmed fraud: Case CC-0084: cardholder C12900 reported unrecognized activity on card C12900-K2. 2 transaction(s) between 2016-07-04 and 2016-07-04 totaling $497.99 were confirmed fraudulent. Mixed-channel activity ",
+        "source": "graph",
+        "ref": "query:similar_prior_cases",
+        "entity_ids": []
+      },
+      {
+        "claim": "Similar closed case CC-0367 (out_of_region_use) on this customer/card/device/region was confirmed fraud: Case CC-0367: cardholder C09344 reported unrecognized activity on card C09344-K1. 1 transaction(s) between 2016-07-10 and 2016-07-10 totaling $33.91 were confirmed fraudulent. Card-present use in a bi",
+        "source": "graph",
+        "ref": "query:similar_prior_cases",
+        "entity_ids": []
+      },
+      {
+        "claim": "Similar closed case CC-0411 (account_takeover) on this customer/card/device/region was confirmed fraud: Case CC-0411: cardholder C12900 reported unrecognized activity on card C12900-K2. 1 transaction(s) between 2016-07-11 and 2016-07-11 totaling $226.08 were confirmed fraudulent. Mixed-channel activity ",
+        "source": "graph",
+        "ref": "query:similar_prior_cases",
+        "entity_ids": []
+      },
+      {
+        "claim": "Similar closed case CC-0824 (account_takeover) on this customer/card/device/region was confirmed fraud: Case CC-0824: cardholder C12900 reported unrecognized activity on card C12900-K2. 2 transaction(s) between 2016-07-18 and 2016-07-19 totaling $994.04 were confirmed fraudulent. Mixed-channel activity ",
+        "source": "graph",
+        "ref": "query:similar_prior_cases",
+        "entity_ids": []
+      },
+      {
+        "claim": "Similar closed case CC-0911 (account_takeover) on this customer/card/device/region was confirmed fraud: Case CC-0911: cardholder C12900 reported unrecognized activity on card C12900-K2. 1 transaction(s) between 2016-07-21 and 2016-07-21 totaling $932.08 were confirmed fraudulent. Mixed-channel activity ",
+        "source": "graph",
+        "ref": "query:similar_prior_cases",
+        "entity_ids": []
+      },
+      {
+        "claim": "Relevant policy: ## 3. Card-not-present fraud from a new device",
+        "source": "document",
+        "ref": "fraud_patterns#6",
+        "entity_ids": []
+      }
+    ],
+    "similar_prior_cases": [
+      "CC-0084",
+      "CC-0367",
+      "CC-0411",
+      "CC-0824",
+      "CC-0911"
+    ],
+    "summary": "Case HHG-009 (customer_report) on card C08299-K1 (customer C08299): verdict fraud, fraud probability 0.80. Pattern: card_not_present_fraud. Exposure: $30.02. Key evidence: Card C08299-K1 has 56 known transactions on file ({'online': 50, 'in_person': 6}). Similar closed case CC-0084 (account_takeover) on this customer/card/device/region was confirmed fraud: Case CC-0084: cardholder C12900 reported unrecognized activity on card C12900-K2. 2 transaction(s) between 2016-07-04 and 2016-07-04 totaling $497.99 were confirmed fraudulent. Mixed-channel activity ",
+    "written_to_graph": true,
+    "graph_case_id": "CASE-HHG-009"
+  },
+  "evidence_requests": [],
+  "next_best_actions": {
+    "initial": [
+      {
+        "action": "BLOCK_CARD",
+        "route": "L1",
+        "reason": "R2: customer denies the transaction"
+      },
+      {
+        "action": "CREATE_CASE",
+        "route": "auto",
+        "reason": "R2: customer denial opens a case"
+      }
+    ],
+    "final": [
+      {
+        "action": "BLOCK_CARD",
+        "route": "L1",
+        "reason": "R2: customer denies the transaction"
+      },
+      {
+        "action": "CREATE_CASE",
+        "route": "auto",
+        "reason": "R2: customer denial opens a case"
+      }
+    ],
+    "what_changed": "nothing"
+  },
+  "sar": {
+    "file": false,
+    "reason": "Policy 3a: fraud probability 0.80 but exposure $30.02 is at or below $1,000 and the activity does not connect to a shared device/region cluster or another customer's fraud -- no SAR trigger met.",
+    "narrative": "",
+    "subjects": [],
+    "total_amount_usd": 0,
+    "activity_dates": []
+  },
+  "stop_reason": "Probability remains in the uncertain band after graph evidence and available verification; escalating to a human analyst per R8 rather than continuing indefinitely (Policy Section 6).",
+  "tool_calls": 6,
+  "tokens": 0,
+  "latency_s": 0.081
+}

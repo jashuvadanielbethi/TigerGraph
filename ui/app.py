@@ -224,6 +224,101 @@ def inject_theme() -> None:
     @keyframes popIn{ 0%{ opacity:0; transform:scale(.85) translateY(10px);} 60%{ opacity:1; transform:scale(1.03);} 100%{ transform:scale(1) translateY(0);} }
     @keyframes pulseRing{ 0%{ transform:scale(.85); opacity:.65;} 100%{ transform:scale(1.5); opacity:0;} }
 
+    /* ---- glassmorphism: New investigation form ---- */
+    [data-testid="stForm"]{
+        position:relative; overflow:hidden; border:1px solid rgba(255,255,255,.55) !important;
+        border-radius:26px !important; padding:26px 26px 20px !important;
+        background:
+            radial-gradient(420px 260px at 8% 10%, rgba(12,157,69,.38), transparent 70%),
+            radial-gradient(380px 300px at 92% 18%, rgba(10,132,255,.32), transparent 70%),
+            radial-gradient(360px 280px at 70% 105%, rgba(191,90,242,.30), transparent 70%),
+            linear-gradient(135deg, #eaf7ee 0%, #eaf1ff 55%, #f4eaff 100%) !important;
+        box-shadow: 0 24px 60px -24px rgba(20,40,90,.35) !important; }
+    [data-testid="stForm"] label, [data-testid="stForm"] label p{ color:#1d1d1f !important; font-weight:700 !important; }
+
+    [data-testid="stForm"] .stTextInput input,
+    [data-testid="stForm"] .stTextArea textarea,
+    [data-testid="stForm"] div[data-baseweb="select"] > div,
+    [data-testid="stForm"] [data-testid="stSelectbox"] div[data-baseweb="select"] > div{
+        background: rgba(255,255,255,.42) !important;
+        -webkit-backdrop-filter: blur(16px) saturate(170%); backdrop-filter: blur(16px) saturate(170%);
+        border:1px solid rgba(255,255,255,.75) !important; border-radius:16px !important;
+        box-shadow: 0 8px 24px -10px rgba(20,40,90,.28), inset 0 1px 0 rgba(255,255,255,.85) !important;
+        color:#1d1d1f !important; -webkit-text-fill-color:#1d1d1f !important; }
+    [data-testid="stForm"] [data-testid="stTextInputRootElement"],
+    [data-testid="stForm"] [data-testid="stTextAreaRootElement"]{
+        background: rgba(255,255,255,.42) !important;
+        -webkit-backdrop-filter: blur(16px) saturate(170%); backdrop-filter: blur(16px) saturate(170%);
+        border:1px solid rgba(255,255,255,.75) !important; border-radius:16px !important; overflow:hidden;
+        box-shadow: 0 8px 24px -10px rgba(20,40,90,.28), inset 0 1px 0 rgba(255,255,255,.85) !important;
+        transition: all .2s ease; }
+    [data-testid="stForm"] [data-testid="stTextInputRootElement"]:focus-within,
+    [data-testid="stForm"] [data-testid="stTextAreaRootElement"]:focus-within{
+        background: rgba(255,255,255,.62) !important; border-color: rgba(12,157,69,.85) !important;
+        box-shadow: 0 0 0 4px rgba(12,157,69,.18), 0 10px 28px -10px rgba(12,157,69,.4) !important; }
+    [data-testid="stForm"] [data-testid="stSelectbox"] div:has(> input){
+        background: rgba(255,255,255,.42) !important;
+        -webkit-backdrop-filter: blur(16px) saturate(170%); backdrop-filter: blur(16px) saturate(170%);
+        border:1px solid rgba(255,255,255,.75) !important; border-radius:16px !important;
+        box-shadow: 0 8px 24px -10px rgba(20,40,90,.28), inset 0 1px 0 rgba(255,255,255,.85) !important; }
+    [data-testid="stForm"] [data-testid="stSelectbox"] div:has(> input):focus-within{
+        background: rgba(255,255,255,.62) !important; border-color: rgba(12,157,69,.85) !important;
+        box-shadow: 0 0 0 4px rgba(12,157,69,.18), 0 10px 28px -10px rgba(12,157,69,.4) !important; }
+    [data-testid="stForm"] .stTextInput input, [data-testid="stForm"] .stTextArea textarea,
+    [data-testid="stForm"] .stTextInput input:focus, [data-testid="stForm"] .stTextArea textarea:focus{
+        background:transparent !important; border:none !important; box-shadow:none !important;
+        -webkit-backdrop-filter:none !important; backdrop-filter:none !important; }
+    [data-testid="stForm"] .stTextInput input{ padding:.7rem .95rem !important; font-size:1rem !important; }
+    [data-testid="stForm"] .stTextInput input::placeholder,
+    [data-testid="stForm"] .stTextArea textarea::placeholder{ color:rgba(29,29,31,.45) !important; -webkit-text-fill-color:rgba(29,29,31,.45) !important; }
+    [data-testid="stForm"] .stTextInput input:focus,
+    [data-testid="stForm"] .stTextArea textarea:focus,
+    [data-testid="stForm"] div[data-baseweb="select"]:focus-within > div{
+        background: rgba(255,255,255,.62) !important; border-color: rgba(12,157,69,.85) !important;
+        box-shadow: 0 0 0 4px rgba(12,157,69,.18), 0 10px 28px -10px rgba(12,157,69,.4) !important; }
+    [data-testid="stForm"] div[data-baseweb="select"] *, [data-testid="stForm"] [data-testid="stSelectbox"] *{
+        color:#1d1d1f !important; -webkit-text-fill-color:#1d1d1f !important; background-color:transparent !important; }
+    [data-testid="stForm"] div[data-baseweb="select"] svg{ fill:#1d1d1f !important; }
+
+    [data-testid="stForm"] [data-testid="stFormSubmitButton"]>button{
+        background: linear-gradient(135deg, rgba(12,157,69,.92), rgba(8,122,53,.92)) !important;
+        -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+        border:1px solid rgba(255,255,255,.55) !important; color:#fff !important; -webkit-text-fill-color:#fff !important;
+        padding:.7rem 2.2rem !important; font-size:1rem !important; letter-spacing:.01em;
+        box-shadow: 0 14px 30px -10px rgba(12,157,69,.65), inset 0 1px 0 rgba(255,255,255,.45) !important; }
+    [data-testid="stForm"] [data-testid="stFormSubmitButton"]>button:hover{
+        transform: translateY(-3px) scale(1.02); box-shadow: 0 20px 38px -10px rgba(12,157,69,.75), inset 0 1px 0 rgba(255,255,255,.5) !important; }
+    [data-testid="stForm"] [data-testid="stFormSubmitButton"]>button p{ color:#fff !important; -webkit-text-fill-color:#fff !important; }
+
+    /* ---- verdict pop-up (Detected Fraud / Safe) ---- */
+    .verdict-overlay{ position:fixed; inset:0; z-index:99999; display:flex; align-items:center; justify-content:center;
+        background:rgba(15,15,20,.28); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+        pointer-events:none; animation: overlayLife 4.2s ease both; }
+    .verdict-modal{ position:relative; min-width:min(86vw,420px); text-align:center; padding:38px 44px 34px;
+        border-radius:32px; color:#fff; border:1px solid rgba(255,255,255,.45);
+        -webkit-backdrop-filter: blur(24px) saturate(180%); backdrop-filter: blur(24px) saturate(180%);
+        animation: modalPop .7s cubic-bezier(.34,1.56,.64,1) both; }
+    .verdict-modal.fraud{ background:linear-gradient(145deg, rgba(255,59,48,.88), rgba(160,20,20,.90));
+        box-shadow: 0 30px 80px -10px rgba(255,59,48,.6), inset 0 1px 0 rgba(255,255,255,.4); }
+    .verdict-modal.safe{ background:linear-gradient(145deg, rgba(12,180,80,.88), rgba(6,110,48,.92));
+        box-shadow: 0 30px 80px -10px rgba(12,157,69,.6), inset 0 1px 0 rgba(255,255,255,.4); }
+    .verdict-modal.review{ background:linear-gradient(145deg, rgba(255,159,10,.9), rgba(200,100,0,.92));
+        box-shadow: 0 30px 80px -10px rgba(255,149,0,.55), inset 0 1px 0 rgba(255,255,255,.4); }
+    .verdict-icon{ width:92px; height:92px; margin:0 auto 16px; border-radius:50%; background:rgba(255,255,255,.2);
+        border:1px solid rgba(255,255,255,.5); display:flex; align-items:center; justify-content:center; position:relative; }
+    .verdict-icon .vring{ position:absolute; inset:-10px; border-radius:50%; border:3px solid rgba(255,255,255,.7);
+        animation: pulseRing 1.2s ease-out 3; }
+    .verdict-icon svg{ animation: iconBounce .9s .25s cubic-bezier(.34,1.56,.64,1) both; }
+    .verdict-modal p.verdict-title{ font-size:2.4rem !important; line-height:1.15 !important; font-weight:800 !important;
+        letter-spacing:-0.02em; margin:0 !important; color:#fff !important; }
+    .verdict-modal .verdict-sub{ margin-top:6px; font-size:.95rem; color:rgba(255,255,255,.88) !important; }
+    .verdict-modal.fraud{ animation: modalPop .7s cubic-bezier(.34,1.56,.64,1) both, shake .5s .7s ease both; }
+
+    @keyframes overlayLife{ 0%{opacity:0; visibility:visible;} 8%{opacity:1;} 82%{opacity:1;} 100%{opacity:0; visibility:hidden;} }
+    @keyframes modalPop{ 0%{opacity:0; transform:scale(.55) translateY(30px);} 100%{opacity:1; transform:scale(1) translateY(0);} }
+    @keyframes iconBounce{ 0%{transform:scale(0) rotate(-25deg);} 100%{transform:scale(1) rotate(0);} }
+    @keyframes shake{ 0%,100%{transform:translateX(0);} 20%{transform:translateX(-9px);} 40%{transform:translateX(8px);} 60%{transform:translateX(-5px);} 80%{transform:translateX(3px);} }
+
     [data-testid="stDataFrame"], [data-testid="stTable"]{ border-radius: var(--radius-md); overflow:hidden;
         border:1px solid var(--border); box-shadow: var(--shadow-sm); }
     #MainMenu, footer, header{ visibility:hidden; }
@@ -236,6 +331,22 @@ def badge_html(kind: str, meta: dict, key: str, pulse: bool = True) -> str:
     ring = f'<span class="ring" style="color:{m["color"]}"></span>' if pulse else ""
     return (f'<span class="badge pop-in" style="background:{m.get("tint", m["color"] + "1A")}; '
             f'color:{m["color"]}">{ring}{icon(m["icon"], 15, m["color"])} {m["label"]}</span>')
+
+
+def verdict_popup(verdict: str, case_id: str) -> None:
+    kind, title, sub, ic = {
+        "fraud": ("fraud", "Detected Fraud", "This transaction shows fraud indicators", "alert"),
+        "legitimate": ("safe", "Safe", "This transaction looks legitimate", "shield"),
+    }.get(verdict, ("review", "Needs Review", "Evidence is inconclusive", "help"))
+    st.markdown(f"""
+    <div class="verdict-overlay">
+      <div class="verdict-modal {kind}">
+        <div class="verdict-icon"><span class="vring"></span>{icon(ic, 46, '#ffffff', 2.2)}</div>
+        <p class="verdict-title">{title}</p>
+        <div class="verdict-sub">{case_id}</div>
+        <div class="verdict-sub">{sub}</div>
+      </div>
+    </div>""", unsafe_allow_html=True)
 
 
 def stat_grid(items: list[tuple[str, str, str]]) -> None:
@@ -412,12 +523,6 @@ def render_overview(cases: dict[str, dict]) -> None:
 
 
 def render_new_investigation() -> None:
-    st.markdown(f"""
-    <div class="card">
-      {icon('search', 15)} Run the live pipeline against <b>any transaction in the dataset</b>, not just the
-      20 case-pack cases &mdash; demonstrates monitoring beyond the graded case pack.
-    </div>""", unsafe_allow_html=True)
-
     if not has_processed_data():
         st.error("data/processed/*.pkl not found. Run `python data_ingest/build_index.py` first.")
         return
@@ -461,6 +566,7 @@ def render_new_investigation() -> None:
         with st.spinner("Investigating… pulling card history, checking devices, retrieving case memory"):
             answer = investigate(case_row, idx, [])
 
+        verdict_popup(answer["case"]["verdict"], answer["case_id"])
         st.toast("Investigation complete", icon="✅")
         st.markdown(f"""
         <div class="success-flash">

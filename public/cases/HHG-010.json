@@ -1,0 +1,163 @@
+{
+  "case_id": "HHG-010",
+  "case": {
+    "status": "closed_legitimate",
+    "verdict": "legitimate",
+    "fraud_probability": 0.02,
+    "pattern": "none",
+    "pattern_description": "",
+    "affected_txn_ids": [],
+    "first_suspicious_txn_id": "",
+    "connected_card_ids": [],
+    "connected_device_profiles": [],
+    "exposure_usd": 0.0,
+    "evidence": [
+      {
+        "claim": "Card C10434-K1 has 36 known transactions on file ({'in_person': 18, 'online': 18}).",
+        "source": "graph",
+        "ref": "query:card_window(card_id=C10434-K1)",
+        "entity_ids": [
+          "3016377",
+          "3053503",
+          "3070986",
+          "3075894",
+          "3076736",
+          "3078052",
+          "3082326",
+          "3082968",
+          "3087486",
+          "3091950",
+          "3094730",
+          "3121617",
+          "3139246",
+          "3157522",
+          "3193185",
+          "3197356",
+          "3197666",
+          "3217858",
+          "3237339",
+          "3237387"
+        ]
+      },
+      {
+        "claim": "Bank detection model scored this transaction at 0.90. Treated as a weak prior only, per policy Section 0: a risk score is an input, never a verdict.",
+        "source": "graph",
+        "ref": "case_pack.risk_score",
+        "entity_ids": [
+          "3506725"
+        ]
+      },
+      {
+        "claim": "Online transaction inconsistent with this card's history: amount $1000.03 is 4.9 standard deviations above this card's historical average ($131.25)",
+        "source": "graph",
+        "ref": "query:card_window(product/amount history)",
+        "entity_ids": [
+          "3506725"
+        ]
+      },
+      {
+        "claim": "Identity record marks the device as New for this account",
+        "source": "graph",
+        "ref": "query:identity(id_15,id_23)",
+        "entity_ids": [
+          "3506725"
+        ]
+      },
+      {
+        "claim": "Similar closed case CC-0873 on this same customer was cleared as legitimate: Case CC-0873: model scored a $50.05 transaction at 0.93. Cardholder confirmed travel to the billing region in question. Alert cleared.",
+        "source": "graph",
+        "ref": "query:similar_prior_cases",
+        "entity_ids": []
+      },
+      {
+        "claim": "Similar closed case CC-0154 (card_not_present_fraud) on this customer/card/device/region was confirmed fraud: Case CC-0154: cardholder C03277 reported unrecognized activity on card C03277-K1. 1 transaction(s) between 2016-07-06 and 2016-07-06 totaling $15.06 were confirmed fraudulent. Online purchases inconsi",
+        "source": "graph",
+        "ref": "query:similar_prior_cases",
+        "entity_ids": []
+      },
+      {
+        "claim": "Similar closed case CC-0394 (out_of_region_use) on this customer/card/device/region was confirmed fraud: Case CC-0394: cardholder C02231 reported unrecognized activity on card C02231-K2. 2 transaction(s) between 2016-07-11 and 2016-07-11 totaling $488.00 were confirmed fraudulent. Card-present use in a b",
+        "source": "graph",
+        "ref": "query:similar_prior_cases",
+        "entity_ids": []
+      },
+      {
+        "claim": "Similar closed case CC-0502 (card_not_present_new_device) on this customer/card/device/region was confirmed fraud: Case CC-0502: cardholder C02882 reported unrecognized activity on card C02882-K1. 1 transaction(s) between 2016-07-14 and 2016-07-14 totaling $449.97 were confirmed fraudulent. Online purchases from a",
+        "source": "graph",
+        "ref": "query:similar_prior_cases",
+        "entity_ids": []
+      },
+      {
+        "claim": "Similar closed case CC-1710 (account_takeover) on this customer/card/device/region was confirmed fraud: Case CC-1710: cardholder C05585 reported unrecognized activity on card C05585-K1. 2 transaction(s) between 2016-08-04 and 2016-08-04 totaling $507.48 were confirmed fraudulent. Mixed-channel activity ",
+        "source": "graph",
+        "ref": "query:similar_prior_cases",
+        "entity_ids": []
+      },
+      {
+        "claim": "Relevant policy: ## 3. Card-not-present fraud from a new device",
+        "source": "document",
+        "ref": "fraud_patterns#6",
+        "entity_ids": []
+      },
+      {
+        "claim": "Evidence request (customer_validation): Customer confirms they made this $1000.03 transaction.",
+        "source": "customer",
+        "ref": "evidence_request:1",
+        "entity_ids": [
+          "3506725"
+        ]
+      }
+    ],
+    "similar_prior_cases": [
+      "CC-0873",
+      "CC-0154",
+      "CC-0394",
+      "CC-0502",
+      "CC-1710"
+    ],
+    "summary": "Case HHG-010 (risk_score) on card C10434-K1 (customer C10434): verdict legitimate, fraud probability 0.02. Key evidence: Card C10434-K1 has 36 known transactions on file ({'in_person': 18, 'online': 18}). Bank detection model scored this transaction at 0.90. Treated as a weak prior only, per policy Section 0: a risk score is an input, never a verdict.",
+    "written_to_graph": true,
+    "graph_case_id": "CASE-HHG-010"
+  },
+  "evidence_requests": [
+    {
+      "type": "customer_validation",
+      "asked_after_step": 1,
+      "assumed_response": "Customer confirms they made this $1000.03 transaction."
+    }
+  ],
+  "next_best_actions": {
+    "initial": [
+      {
+        "action": "VERIFY_WITH_CUSTOMER",
+        "route": "auto",
+        "reason": "R1: probability 0.43 rests on a single signal, verify before any block"
+      },
+      {
+        "action": "ESCALATE_TO_ANALYST",
+        "route": "auto",
+        "reason": "R8: uncertain verdict (probability 0.43) with exposure $1000.03 over $500"
+      }
+    ],
+    "final": [
+      {
+        "action": "CLOSE_NO_FRAUD",
+        "route": "auto",
+        "reason": "R3: customer confirmed the transaction"
+      }
+    ],
+    "what_changed": "Simulated customer confirmation (assumed because pre-request probability was 0.43, below the midpoint) settled the case as legitimate per R3."
+  },
+  "sar": {
+    "file": false,
+    "reason": "Policy 3a: fraud not confirmed or strongly suspected (probability below 0.70); no SAR trigger met.",
+    "narrative": "",
+    "subjects": [],
+    "total_amount_usd": 0,
+    "activity_dates": []
+  },
+  "stop_reason": "Fraud probability 0.02 is at or below 0.15, supported by 5 independent evidence type(s); further investigation is unlikely to change the recommendation.",
+  "tool_calls": 6,
+  "tokens": 0,
+  "latency_s": 0.034
+}

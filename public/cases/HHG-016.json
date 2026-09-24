@@ -1,0 +1,112 @@
+{
+  "case_id": "HHG-016",
+  "case": {
+    "status": "closed_fraud",
+    "verdict": "fraud",
+    "fraud_probability": 0.75,
+    "pattern": "card_not_present_fraud",
+    "pattern_description": "",
+    "affected_txn_ids": [
+      "3534820"
+    ],
+    "first_suspicious_txn_id": "3534820",
+    "connected_card_ids": [],
+    "connected_device_profiles": [],
+    "exposure_usd": 59.67,
+    "evidence": [
+      {
+        "claim": "Card C09988-K1 has 61 known transactions on file ({'online': 61}).",
+        "source": "graph",
+        "ref": "query:card_window(card_id=C09988-K1)",
+        "entity_ids": [
+          "3015139",
+          "3032208",
+          "3036519",
+          "3099865",
+          "3105149",
+          "3128905",
+          "3164170",
+          "3174800",
+          "3191366",
+          "3244254",
+          "3266021",
+          "3266022",
+          "3281953",
+          "3282178",
+          "3285143",
+          "3285152",
+          "3285177",
+          "3285211",
+          "3289577",
+          "3295579"
+        ]
+      },
+      {
+        "claim": "Customer report: Customer C09988 message: 'I never made this $59.67 purchase. Please check my card.' Refers to 3534820.",
+        "source": "customer",
+        "ref": "case_pack.trigger_text",
+        "entity_ids": [
+          "3534820"
+        ]
+      },
+      {
+        "claim": "Identity record marks the device as New for this account",
+        "source": "graph",
+        "ref": "query:identity(id_15,id_23)",
+        "entity_ids": [
+          "3534820"
+        ]
+      },
+      {
+        "claim": "Relevant policy: ## 3. Card-not-present fraud from a new device",
+        "source": "document",
+        "ref": "fraud_patterns#6",
+        "entity_ids": []
+      }
+    ],
+    "similar_prior_cases": [],
+    "summary": "Case HHG-016 (customer_report) on card C09988-K1 (customer C09988): verdict fraud, fraud probability 0.75. Pattern: card_not_present_fraud. Exposure: $59.67. Key evidence: Card C09988-K1 has 61 known transactions on file ({'online': 61}). Identity record marks the device as New for this account",
+    "written_to_graph": true,
+    "graph_case_id": "CASE-HHG-016"
+  },
+  "evidence_requests": [],
+  "next_best_actions": {
+    "initial": [
+      {
+        "action": "BLOCK_CARD",
+        "route": "L1",
+        "reason": "R2: customer denies the transaction"
+      },
+      {
+        "action": "CREATE_CASE",
+        "route": "auto",
+        "reason": "R2: customer denial opens a case"
+      }
+    ],
+    "final": [
+      {
+        "action": "BLOCK_CARD",
+        "route": "L1",
+        "reason": "R2: customer denies the transaction"
+      },
+      {
+        "action": "CREATE_CASE",
+        "route": "auto",
+        "reason": "R2: customer denial opens a case"
+      }
+    ],
+    "what_changed": "nothing"
+  },
+  "sar": {
+    "file": false,
+    "reason": "Policy 3a: fraud probability 0.75 but exposure $59.67 is at or below $1,000 and the activity does not connect to a shared device/region cluster or another customer's fraud -- no SAR trigger met.",
+    "narrative": "",
+    "subjects": [],
+    "total_amount_usd": 0,
+    "activity_dates": []
+  },
+  "stop_reason": "Probability remains in the uncertain band after graph evidence and available verification; escalating to a human analyst per R8 rather than continuing indefinitely (Policy Section 6).",
+  "tool_calls": 6,
+  "tokens": 0,
+  "latency_s": 0.034
+}

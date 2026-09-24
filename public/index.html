@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HHGOA Fraud Investigation Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--accent:#0c9d45;--accent-d:#087a35;--danger:#ff3b30;--warn:#ff9500;--ink:#1d1d1f;--soft:#6e6e73;--bg:#f4f4f7;--surf:#fff;--bd:rgba(0,0,0,.07);--sh:0 10px 30px -12px rgba(0,0,0,.16)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",Inter,ui-sans-serif,sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1040px;margin:0 auto;padding:28px 20px 60px}
+.hero{display:flex;gap:14px;align-items:center;padding:22px 26px;border-radius:20px;background:linear-gradient(135deg,#101113,#1d1d1f 60%,#0c1f12 130%);box-shadow:var(--sh);animation:pop .5s cubic-bezier(.34,1.56,.64,1) both}
+.hero i{width:46px;height:46px;border-radius:14px;background:var(--accent);display:flex;align-items:center;justify-content:center;flex:none;box-shadow:0 6px 18px rgba(12,157,69,.45)}
+.hero h1{margin:0;color:#fff;font-size:1.4rem;letter-spacing:-.02em;font-weight:800}
+.hero p{margin:2px 0 0;color:rgba(255,255,255,.62);font-size:.85rem}
+.tabs{display:inline-flex;gap:4px;margin:20px 0 18px;padding:5px;border-radius:999px;background:#f7f7fa;border:1px solid var(--bd)}
+.tabs button{border:0;background:none;padding:8px 20px;border-radius:999px;font:600 .9rem inherit;font-family:inherit;color:var(--soft);cursor:pointer;transition:.2s}
+.tabs button.on{background:#fff;color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:8px 0 18px}
+.stat{background:var(--surf);border:1px solid var(--bd);border-radius:14px;padding:14px 16px;animation:pop .45s cubic-bezier(.34,1.56,.64,1) both}
+.stat b{display:block;font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;color:var(--soft);margin-bottom:6px}
+.stat span{font-size:1.5rem;font-weight:800;letter-spacing:-.02em}
+.card{background:var(--surf);border:1px solid var(--bd);border-radius:20px;padding:20px 22px;margin-bottom:14px}
+.quote{background:#f7f7fa;border-left:3px solid var(--accent);border-radius:0 10px 10px 0;padding:14px 16px;line-height:1.5;margin:10px 0 16px;font-size:.92rem}
+table{width:100%;border-collapse:collapse;font-size:.86rem}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--bd);vertical-align:top}
+th{color:var(--soft);font-size:.72rem;text-transform:uppercase;letter-spacing:.04em}
+tr.row{cursor:pointer;transition:.15s}tr.row:hover{background:#f7f7fa}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:5px 13px;border-radius:999px;font-weight:700;font-size:.82rem;position:relative}
+.fraud{background:rgba(255,59,48,.1);color:var(--danger)}.legit{background:rgba(12,157,69,.1);color:var(--accent)}.unc{background:rgba(255,149,0,.1);color:var(--warn)}
+.route-auto{background:rgba(12,157,69,.1);color:var(--accent)}.route-L1{background:rgba(255,149,0,.12);color:var(--warn)}.route-L2{background:rgba(255,59,48,.1);color:var(--danger)}
+.chip{display:inline-block;padding:4px 10px;margin:2px 4px 2px 0;border-radius:8px;font-size:.78rem;font-weight:600;background:#f7f7fa;border:1px solid var(--bd)}
+select{padding:10px 14px;border-radius:14px;border:1px solid var(--bd);background:#fff;font:600 .95rem inherit;font-family:inherit;color:var(--ink);min-width:260px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:18px}@media(max-width:720px){.two{grid-template-columns:1fr}}
+.act{display:flex;justify-content:space-between;gap:10px;background:#fff;border:1px solid var(--bd);border-radius:14px;padding:12px 14px;margin-bottom:10px;animation:pop .4s cubic-bezier(.34,1.56,.64,1) both}
+.act b{font-size:.92rem}.act small{display:block;color:var(--soft);margin-top:3px;line-height:1.4}
+h3{margin:0 0 10px;letter-spacing:-.02em}
+.sar{border-left:3px solid var(--danger)}.sar p{font-size:.86rem;line-height:1.55;margin:6px 0}
+.ov{position:fixed;inset:0;z-index:99;display:flex;align-items:center;justify-content:center;background:rgba(15,15,20,.28);backdrop-filter:blur(10px);pointer-events:none;animation:life 3.2s ease both}
+.modal{min-width:min(86vw,400px);text-align:center;padding:36px 44px;border-radius:32px;color:#fff;border:1px solid rgba(255,255,255,.45);animation:pop .7s cubic-bezier(.34,1.56,.64,1) both}
+.modal.f{background:linear-gradient(145deg,rgba(255,59,48,.9),rgba(160,20,20,.92));box-shadow:0 30px 80px -10px rgba(255,59,48,.6);animation:pop .7s cubic-bezier(.34,1.56,.64,1) both,shake .5s .7s both}
+.modal.s{background:linear-gradient(145deg,rgba(12,180,80,.9),rgba(6,110,48,.92));box-shadow:0 30px 80px -10px rgba(12,157,69,.6)}
+.modal.r{background:linear-gradient(145deg,rgba(255,159,10,.9),rgba(200,100,0,.92))}
+.modal .ic{width:88px;height:88px;margin:0 auto 14px;border-radius:50%;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.5);display:flex;align-items:center;justify-content:center;position:relative}
+.modal .ic:after{content:"";position:absolute;inset:-10px;border-radius:50%;border:3px solid rgba(255,255,255,.7);animation:ring 1.2s ease-out 3}
+.modal h2{margin:0;font-size:2.3rem;font-weight:800;letter-spacing:-.02em}.modal p{margin:6px 0 0;opacity:.9}
+@keyframes pop{0%{opacity:0;transform:scale(.6) translateY(24px)}100%{opacity:1;transform:none}}
+@keyframes life{0%{opacity:0}8%{opacity:1}82%{opacity:1}100%{opacity:0;visibility:hidden}}
+@keyframes ring{0%{transform:scale(.85);opacity:.7}100%{transform:scale(1.5);opacity:0}}
+@keyframes shake{0%,100%{transform:none}20%{transform:translateX(-9px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(3px)}}
+.note{color:var(--soft);font-size:.8rem;margin-top:26px;line-height:1.5}
+pre{background:#101113;color:#e6e6e6;padding:16px;border-radius:14px;overflow:auto;font-size:.78rem;max-height:520px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hero"><i><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-4.35-4.35"/></svg></i>
+    <div><h1>TigerGraph Agentic Fraud Investigation</h1><p>HHGOA case pack &middot; 20 graded cases investigated under Fraud Policy v1.0</p></div></div>
+  <div class="tabs"><button id="t-over" class="on">Overview</button><button id="t-det">Case detail</button></div>
+  <div id="app"></div>
+  <p class="note">Read-only view of the 20 answer files in <code>cases/</code>. Live investigation of any transaction ID runs in the Python dashboard (<code>streamlit run ui/app.py</code>) because it needs the 590K-transaction dataset; see the README.</p>
+</div>
+<script>
+const IDS=Array.from({length:20},(_,i)=>"HHG-"+String(i+1).padStart(3,"0"));
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const V={fraud:["Fraud","fraud"],legitimate:["Legitimate","legit"],uncertain:["Uncertain","unc"]};
+const ROUTE={auto:"Auto-executed",L1:"L1 — team lead",L2:"L2 — fraud manager"};
+let cases={},current=IDS[0];
+const badge=v=>`<span class="badge ${V[v][1]}">${V[v][0]}</span>`;
+const title=t=>t.replaceAll("_"," ");
+function popup(v,id){
+  const k=v==="fraud"?["f","Detected Fraud","This transaction shows fraud indicators",'<path d="M12 3 2 20h20L12 3Z"/><path d="M12 10v4"/><path d="M12 17h.01"/>']
+   :v==="legitimate"?["s","Safe","This transaction looks legitimate",'<path d="M12 3 4.5 6v6c0 4.5 3 7.5 7.5 9 4.5-1.5 7.5-4.5 7.5-9V6L12 3Z"/><path d="m8.5 12 2.4 2.4L15.5 9.5"/>']
+   :["r","Needs Review","Evidence is inconclusive",'<circle cx="12" cy="12" r="9"/><path d="M12 17h.01"/>'];
+  const d=document.createElement("div");d.className="ov";
+  d.innerHTML=`<div class="modal ${k[0]}"><div class="ic"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">${k[3]}</svg></div><h2>${k[1]}</h2><p>${esc(id)}</p><p>${k[2]}</p></div>`;
+  document.body.appendChild(d);setTimeout(()=>d.remove(),3300);
+}
+function overview(){
+  const all=IDS.map(i=>cases[i]),f=all.filter(a=>a.case.verdict==="fraud").length,l=all.filter(a=>a.case.verdict==="legitimate").length,s=all.filter(a=>a.sar.file).length;
+  const stats=[["Cases",all.length],["Fraud",f],["Legitimate",l],["SARs filed",s]].map((x,i)=>`<div class="stat" style="animation-delay:${i*.04}s"><b>${x[0]}</b><span>${x[1]}</span></div>`).join("");
+  const rows=IDS.map(i=>{const c=cases[i].case;return `<tr class="row" data-id="${i}"><td><b>${i}</b></td><td>${badge(c.verdict)}</td><td>${esc(title(c.pattern))}</td><td>${c.fraud_probability.toFixed(2)}</td><td>$${c.exposure_usd.toFixed(2)}</td><td>${cases[i].sar.file?"Yes":"No"}</td></tr>`}).join("");
+  $("#app").innerHTML=`<div class="grid">${stats}</div><div class="card"><table><tr><th>Case</th><th>Verdict</th><th>Pattern</th><th>Probability</th><th>Exposure</th><th>SAR</th></tr>${rows}</table></div>`;
+  document.querySelectorAll("tr.row").forEach(r=>r.onclick=()=>{current=r.dataset.id;show("det");popup(cases[current].case.verdict,current)});
+}
+function actions(list){return list.map(a=>`<div class="act"><div><b>${esc(title(a.action).toLowerCase().replace(/^./,c=>c.toUpperCase()))}</b><small>${esc(a.reason)}</small></div><span class="badge route-${a.route}" style="white-space:nowrap;height:fit-content">${ROUTE[a.route]}</span></div>`).join("")}
+function detail(){
+  const a=cases[current],c=a.case;
+  const opts=IDS.map(i=>`<option value="${i}" ${i===current?"selected":""}>${i} — ${V[cases[i].case.verdict][0]}</option>`).join("");
+  const ev=c.evidence.map(e=>`<tr><td>${esc(e.source)}</td><td>${esc(e.claim)}</td><td>${esc(e.ref)}</td></tr>`).join("");
+  const stats=[["Fraud probability",c.fraud_probability.toFixed(2)],["Exposure","$"+c.exposure_usd.toFixed(2)],["Pattern",title(c.pattern)],["Status",title(c.status)],["SAR filed",a.sar.file?"Yes":"No"]].map((x,i)=>`<div class="stat" style="animation-delay:${i*.04}s"><b>${x[0]}</b><span>${esc(x[1])}</span></div>`).join("");
+  const req=a.evidence_requests.length?a.evidence_requests.map(r=>`<span class="chip">${esc(r.type)}</span> ${esc(r.assumed_response)}`).join("<br>"):"None requested — initial evidence was sufficient to decide.";
+  const sar=a.sar.file?`<div class="card sar"><b style="color:var(--danger)">Suspicious Activity Report filed</b><p><b>Reason:</b> ${esc(a.sar.reason)}</p><p><b>Subjects:</b> ${esc(a.sar.subjects.join(", "))}</p><p><b>Total:</b> $${a.sar.total_amount_usd.toFixed(2)} &middot; <b>Dates:</b> ${esc(a.sar.activity_dates.join(" to "))}</p><p style="color:var(--soft)">${esc(a.sar.narrative)}</p></div>`:`<div class="card">No SAR filed. ${esc(a.sar.reason)}</div>`;
+  $("#app").innerHTML=`<select id="pick">${opts}</select>
+  <div style="display:flex;gap:12px;align-items:center;margin:16px 0 4px"><h3 style="margin:0">${current}</h3>${badge(c.verdict)}</div>
+  <div class="grid">${stats}</div><div class="quote">${esc(c.summary)}</div>
+  ${c.pattern==="undocumented"&&c.pattern_description?`<div class="card" style="border-left:3px solid var(--warn)"><b>Undocumented pattern</b><p style="color:var(--soft);font-size:.88rem">${esc(c.pattern_description)}</p></div>`:""}
+  ${c.connected_card_ids.length?`<p><b style="font-size:.85rem">Connected cards (shared origin)</b><br>${c.connected_card_ids.map(x=>`<span class="chip">${esc(x)}</span>`).join("")}</p>`:""}
+  <div class="card"><h3>Next-best-action</h3><div class="two"><div><small style="color:var(--soft)">BEFORE EVIDENCE</small>${actions(a.next_best_actions.initial)}</div><div><small style="color:var(--soft)">AFTER EVIDENCE</small>${actions(a.next_best_actions.final)}</div></div><div class="quote"><b>What changed:</b> ${esc(a.next_best_actions.what_changed)}</div></div>
+  <div class="card"><h3>Evidence</h3><table><tr><th>Source</th><th>Claim</th><th>Ref</th></tr>${ev}</table>
+    <p style="margin-top:14px"><b>Similar prior cases:</b> ${c.similar_prior_cases.map(x=>`<span class="chip">${esc(x)}</span>`).join("")||"none"}</p>
+    <p><b>Evidence requests:</b> ${req}</p><p><b>Stop reason:</b> ${esc(a.stop_reason)}</p>
+    <small style="color:var(--soft)">tool_calls=${a.tool_calls} &middot; tokens=${a.tokens} &middot; latency=${a.latency_s}s</small></div>
+  ${sar}<details class="card"><summary><b>Raw JSON</b></summary><pre>${esc(JSON.stringify(a,null,2))}</pre></details>`;
+  $("#pick").onchange=e=>{current=e.target.value;detail();popup(cases[current].case.verdict,current)};
+}
+function show(t){$("#t-over").classList.toggle("on",t==="over");$("#t-det").classList.toggle("on",t==="det");t==="over"?overview():detail()}
+$("#t-over").onclick=()=>show("over");$("#t-det").onclick=()=>show("det");
+Promise.all(IDS.map(i=>fetch(`cases/${i}.json`).then(r=>r.json()).then(j=>cases[i]=j))).then(()=>show("over")).catch(e=>{$("#app").innerHTML=`<div class="card">Could not load case files: ${esc(e)}</div>`});
+</script>
+</body>
+</html>

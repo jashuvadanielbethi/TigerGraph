@@ -108,6 +108,21 @@ before/after next best action, SAR), and **New investigation** (enter any
 transaction ID from the dataset to investigate it live; a red "Detected
 Fraud" or green "Safe" popup shows the verdict).
 
+## Deploy to Vercel (read-only results site)
+
+The Streamlit dashboard cannot run on Vercel (it needs a long-running server
+and the 700 MB dataset). Instead the repo ships a static, read-only site in
+[`public/`](public/) that shows the 20 answer files (overview, case detail,
+next best action before/after, SAR, and the Detected Fraud / Safe popup).
+`vercel.json` tells Vercel to skip Python detection and just serve `public/`.
+
+1. Import the GitHub repo in Vercel with all defaults. No framework, build
+   command, or environment variables are needed.
+2. Deploy.
+
+If you change `cases/`, refresh the site's copy with
+`cp cases/*.json public/cases/` and commit.
+
 ## Answer file format
 
 Each `cases/<case_id>.json` follows the dataset's Answer Format:
